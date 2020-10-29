@@ -1,0 +1,618 @@
+
+															Concurrent collections
+															----------------------
+
+	Need of concurrent collections:
+	-------------------------------
+		1. Most of traditional collection classes are not thread safe. So multiple threads can operate simultaneously. 
+			There may be a chance of data inconsistency
+		2. We can achieve thread safety with normal collection classes.
+				Vector, HashTable
+				SynchronizedList
+				SynchronizedMap
+				SynchronizedSet
+			All the above class methods are synchronized i.e, only one thread can allow inside collection object. 
+			By using above classes we can achieve thread safety but we will get performance problem
+		3. While one thread iterating collection object if any other thread trying to perform structural modification(inserting/removing)
+			immediately iterator will fails and raise ConcurrentModificationException
+	
+	By above 3 reasons the traditional Collection class objects are not supported multi-threaded scalable application 
+
+		Example:
+		
+				import java.util.*;
+
+
+				public class ConcurrentExceptionDemo implements Runnable{
+					
+					private static List<String> l = new ArrayList<String>();
+					
+					public void run(){
+						
+						try{
+							
+							Thread.sleep(2000);
+						}
+						catch(InterruptedException ie){
+							
+						}
+						l.add("test");
+						
+						
+					}
+					public static void main(String[] args){
+						
+						l.add("kranti");
+						l.add("suganya");
+						l.add("kumar");
+						l.add("hiarany");
+						l.add("saya");
+						
+						
+						
+						Thread t = new Thread(new ConcurrentExceptionDemo());
+						t.start();
+						
+						Iterator<String> iter = l.iterator();
+						while(iter.hasNext()){
+							String s = iter.next();
+							try{
+								Thread.sleep(1000);
+							}
+							catch(InterruptedException e){}
+							
+							System.out.println(s);
+							
+						}
+						
+						
+					}
+
+
+
+
+
+
+				}
+			
+		
+	To over come this problem we will go for concurrent collections. Concurrent collections are introduced in 1.5 version
+	Concurrent collections are best suitable for multi-threaded scalable application
+	
+	
+	
+							Tradition collection class			|			concurrent collection class	
+																|
+			----------------------------------------------------------------------------------------------------------------
+				All implemented classes are not thread safe		|		All concurrent collection classes are thread safe
+																|
+				Thread safe collection classes are performance 	|		Relatively performance is high because of different
+				is low											|		locking mechanism
+																|
+				It will throw ConcurrentModificationException	|		It will never throw ConcurrentModificationException
+				when one thread iterating and another thread	|		Multiple threads can acess and can perform structural 
+				is modifying collection class structure			|		operation
+				
+	
+		The main three concurrent collection classes are
+				
+			1. ConcurrentHashMap
+			2. CopyOnWriteArrayList
+			3. CopyOnWriteArraySet
+		
+						
+													java.util.concurrent
+															|
+															|
+															|
+					---------------------------------------------------------------------------------
+					|										|										|
+					|										|										|
+				ConcurrentHashMap						CopyOnWriteArrayList				CopyOnWriteArraySet		
+				
+				
+				
+		ConcurrentHashMap(C)
+		--------------------
+										
+											Map(I)
+											 |
+											 |extends
+											 |
+										ConcurrentMap(I) 3. methods  putIfAbsent, remove, replace
+											 |
+											 |implements
+											 |
+										ConcurrentHashMap(C)
+										
+			ConcurrentMap(I):
+			---------------
+				1. Object putIfAbsent(Object key, Object value):
+						If key is not available then it will add one entry. If key is available it will not add any element.
+						In case of put()(java.utii.map): 
+						if key is not available then it will add one entry. if key is available it ill update old value with new value
+						
+						Map m = new ConcurrentHashMap();
+						m.put(1,"kranti")
+						m.put(2,"suganya")
+						sysout(m) // {1=kranti,2=suganya}
+						m.put(1,"kumar")
+						sysout(m) // {1=kumar,2=suganya}
+						
+						Map m = new ConcurrentHashMap();
+						m.put(1,"kranti")
+						m.put(2,"suganya")
+						sysout(m) // {1=kranti,2=suganya}
+						m.putIfAbsent(1,"kumar")
+						sysout(m) // {1=kranti,2=suganya}
+				
+				
+				2. boolean remove(Object key, Object value);
+						If key is present the  value should be associated with key then only it will remove entry from map;
+						In case of remove(Object key) It will remove the entry if the key value is exists in Map
+					
+						Map m = new ConcurrentHashMap();
+						m.put(1,"kranti")
+						m.put(2,"suganya")
+						sysout(m) // {1=kranti,2=suganya}
+						m.remove(1)
+						sysout(m) // {2=suganya}
+						//in case of m.remove(1,"kumar");
+						
+						sysout(m) // {1=kranti,2=suganya}
+						
+				3. 	boolean replace(Object key, Object oldValue, Object newValue);
+					
+						If key and associated with oldvalue is matched then only it will replace oldValue with newValue.
+					
+						Map m = new ConcurrentHashMap();
+						m.put(1,"kranti")
+						m.put(2,"suganya")
+						m.replace(1,"shiva","kumar")
+						sysout(m) // {1=kranti,2=suganya}
+						m.replace(1,"kranti","kumar");
+						sysout(m) // {1=kumar,2=suganya}
+						
+						
+			ConcurrentHashMap(C)
+			-------------------
+				
+				The initial capacity of ConcurrentHashMap is 16. As we know in Map all the entries are stored in buckets(segment).
+				i.e., Each value is stored in one bucket. At a time it can hold 16 entries means It will have 16 buckets.
+				ConcurrentHashMap will follow segment lock mechanism. It will have 16 segment locks. So at a time 16 threads can access for insert/update operations. For read operation Any no.of thread can access.
+				
+				Initially it has 16 segments. This is called concurrency level
+					initial capacity =16
+					concurrency level =16 
+				
+				In normal hash table object level mechanism including read operation
+				
+				1.	Underlying data structure is Hash  table
+				2. 	Allows concurrent read and thread safe operations
+				3.	Perform read operation thread wont require lock but to perform update operations it will require lock. But it is lock only particular
+					part of map(segment/bucket) instead of total map
+				4.	concurrency update achieved by internally dividing map into smaller portions, defined by concurrency level
+				5.	default concurrency level is 16
+				6.	Any no.of read operations but 16 update operations at a time by default
+				7.	null is not allowed for both keys and values
+				8.	One thread iterating, the other thread can perform update operations simultaneously. It will never throw ConcurrentModificationException
+				
+				
+				Constructors
+				-------------
+					1. ConcurrentHashMap chm = new ConcurrentHashMap(); //default capacity 16, fill Ratio 0.75, concurrency level =16
+					
+					2. ConcurrentHashMap chm = new ConcurrentHashMap(int initialCapacity);
+					
+					3. ConcurrentHashMap chm = new ConcurrentHashMap(int initialCapacity, float fillRatio);
+					
+					4. ConcurrentHashMap chm = new ConcurrentHashMap(int initialCapacity, float fillRatio, int concurrencyLevel);
+					
+					5. ConcurrentHashMap chm = new ConcurrentHashMap(Map m);
+					
+				Example
+				-------
+				
+						import java.util.*;
+						import java.util.concurrent.*;
+
+						public class ConcurrentHashMapDemo implements Runnable{
+							
+							private static Map<Integer,String> chm = new ConcurrentHashMap<>();
+							
+							public void run(){
+								
+								try{
+									
+									Thread.sleep(1000);
+								}
+								catch(InterruptedException ie){
+									
+								}
+								
+								chm.put(5,"kumar");
+								chm.put(6,"hai");
+								//chm.putIfAbsent(6,"hai");
+								
+								
+							}
+							public static void main(String[] args){
+								
+								chm.put(1,"kranti");
+								chm.put(2,"suganya");
+								chm.put(3,"rajesh");
+								chm.put(4,"suresh");
+								chm.put(5,"satya");
+								
+								
+								
+								Thread t = new Thread(new ConcurrentHashMapDemo());
+								t.start();
+								
+								
+								Iterator<Map.Entry<Integer,String>> iter = chm.entrySet().iterator();
+								
+								while(iter.hasNext()){
+									
+									Map.Entry<Integer,String> entry = iter.next();
+									Integer key = entry.getKey();
+									String value = entry.getValue();
+									try{
+										Thread.sleep(1000);
+									}
+									catch(InterruptedException e){}
+									
+									System.out.println(key+" -- "+value);
+									
+								}
+								
+								
+							}
+						}
+					If we replace ConcurrentHashMap with HashMap we will get ConcurrentModificationException.
+					
+				
+				Fail-fast iterator: 
+				--------------------
+					If you modify underlying Collection iterator immediately fails (throws ConcurrentModifcationException)such type iterators are 
+					called fail fast iterator
+					Eg; Iterator of HashMap, 
+					
+				Fail-safe iterator
+				-----------------
+					Iterators will allow to modify collection class in safe manner such type iterators are called fail fast iterator
+					Eg: Iterator of ConcurrentHashMap
+
+
+										HashMap						|				ConcurrentHashMap
+																	|
+				-----------------------------------------------------------------------------------------------------------------------
+																	|
+					Not thread safe									|		Thread-safe
+																	|
+					Relatively performance is high because threads	|		Relatively performance is low because sometimes threads are
+					are not required to wait to operate on HashMap	|		required to wait to operate on ConcurrentHashMap
+																	|
+					While one thread iterating on HashMap, the other|		While one thread iterating on ConcurrentHashMap the other 
+					threads are not allowed to modify HashMap object|		threads are associated to modify map in safe manner and
+					otherwise it will throw 						|		we won't get ConcurrentModifcationException
+					ConcurrentModifcationException					|
+																	|
+					Iterator is fail-fast							|		Iterator is fail-safe
+																	|
+					null is allowed for both key and value			|		null is not allowed for both key and value. 
+																	|
+					Introduced in 1.2 version						|		Introduced in 1.5 version
+					
+					
+
+			
+			
+					
+					ConcurrentHashMap					|				synchronizedMap						|			HashTable
+														|													|
+			------------------------------------------------------------------------------------------------------------------------------------
+				thread safety without locking 					thread safety with locking total object			thread safety with locking total object		
+				total map object.just with segment
+				level lock								
+				
+				At a time multiple thread are allowed			Only one thread allowed at a time to perform  	At a time only one thread allowed 
+				to operate on map object with same				any operation on map object						to perform any operation on map object
+				manner
+				
+				
+				Read operation can be performed without			Every read & write operation required total		Every read & write operation required total
+				lock, but write operation can be performed		map object lock									map object lock
+				with segment level lock
+					
+				while one thread iterating of a map				while one thread iterating it will not allow	while one thread iterating it will not allow
+				object the other threads are allowed			other threads to perform any operation			other threads to perform any operations
+				to modify map and we won't get 
+				ConcurrentModifcationException
+				
+				Iterator is fail-safe							Iterator is fail-fast								Iterator is fail-fast
+				
+				null is not allowed for both & key values		null is allowed for both & key values			null is not allowed for both key & values
+
+				Introduced in 1.5 version						Introduced in 1.2 version						Legacy classes. introduced in 1.0 version
+			
+		
+			
+			CopyOnWriteArrayList(C)
+			-----------------------	
+		
+				
+											Collection(I)
+												|
+												|
+											   List(I)
+												|
+												|
+											CopyOnWriteArrayList(c)
+				
+				It is a thread safe collection class.
+				For every write operation separate cloned copy will be created on that cloned copy it will perform update operation. 
+				Later JVM will sync two objects.
+				This collection class is highly suggestible if more no.of read operation and less no.of write operation.
+				Let us say if collection class have 1000 update operation it will clone 1000 times. So it is worst choice if 
+					class has more no.of write operations
+					
+				It has similar properties of ArrayList
+				
+					Insertion order is preserved
+					Hetrogeneous
+					Dupicate objects
+					null insertion
+					implements Serializable, Cloneable, RandomAccess
+					It is Fail-safe iterator
+				
+				CopyOnWriteArrayList iterator will not perform remove(). If we call Iterator remove() will throw UnSupportedOperation Exception
+				
+				Constructor:
+					
+						CopyOnWriteArrayList cowAl = new CopyOnWriteArrayList();
+						
+						CopyOnWriteArrayList cowAl = new CopyOnWriteArrayList(Collection cl);
+						
+						CopyOnWriteArrayList cowAl = new CopyOnWriteArrayList(Object[] a);
+						
+				Methods
+						boolean addIfAbsent(Object o): If Object is not allowed then only it will add elements
+						
+							CopyOnWriteArrayList cowAl = new CopyOnWriteArrayList();
+							cowAl.add("A");
+							cowAl.add("A");
+							sop(cowAl)//["A","A"]
+							cowAl.addIfAbsent("B");
+							cowAl.addIfAbsent("A");
+							sop(cowAl)//["A","A","B"]
+						
+						boolean addAllAbsent(Collection c) 
+							It will add one by one into CopyOnWriteArrayList object. while adding element it will check object is there are not.
+							If not that only it will add elements
+						
+							CopyOnWriteArrayList cowAl = new CopyOnWriteArrayList();
+							cowAl.add("A");
+							cowAl.add("A");
+							sop(cowAl)//["A","A"]
+							List l = new ArrayList();
+							l.add("B");
+							l.add("V");
+							cowAl.addAll(l);
+							sop(cowAl)//["A","A","B","V"]
+							List l1 = new ArrayList();
+							l1.add("B");
+							l1.add("C");
+							l1.add("A");
+							cowAl.addAllAbsent(l1);
+							sop(cowAl)//["A","A","B","V","C"]
+				
+				Example:
+					
+					import java.util.*;
+					import java.util.concurrent.CopyOnWriteArrayList;
+
+					public class CopyOnWriteArrayListDemo implements Runnable{
+						
+						private static List<String> l = new CopyOnWriteArrayList<String>();
+						
+						public void run(){
+							
+							try{
+								
+								Thread.sleep(1000);
+							}
+							catch(InterruptedException ie){
+								
+							}
+							l.add("test");
+							
+							
+						}
+						public static void main(String[] args){
+							
+							l.add("kranti");
+							l.add("suganya");
+							l.add("kumar");
+							l.add("hiarany");
+							l.add("saya");
+							
+							
+							
+							Thread t = new Thread(new CopyOnWriteArrayListDemo());
+							t.start();
+							
+							Iterator<String> iter = l.iterator();
+							while(iter.hasNext()){
+								String s = iter.next();
+								try{
+									Thread.sleep(1000);
+								}
+								catch(InterruptedException e){}
+								
+								System.out.println(s);
+								
+							}
+							
+							
+						}
+
+
+
+
+
+
+					}
+				
+				If we replace l1 implemented class is CopyOnWriteArrayList then we will get ConcurrentModifcationException
+				
+				
+				
+				After getting iterator if we perform any update operation the iterator will not get updated element
+				
+				
+					import java.util.concurrent.CopyOnWriteArrayList;
+					import java.util.Iterator;
+
+					class CopyOnWriteArrayListDemo2{
+						
+						
+						public static void main(String[] args){
+							
+							CopyOnWriteArrayList<String> cowl = new CopyOnWriteArrayList<>();
+							cowl.add("A");
+							cowl.add("B");
+							cowl.add("C");
+							System.out.println(cowl); //["A","B","C"]
+							Iterator<String> iter = cowl.iterator();
+							cowl.add("D");
+							System.out.println("Iterator");
+							while(iter.hasNext()){
+								
+								System.out.println(iter.next()); //"A","B","C"
+								
+							}
+							
+							System.out.println("After Iterator cowl is "+cowl); //["A","B","C", "D"]
+							
+							
+						}
+						
+						
+					}
+					
+				
+								
+								
+								
+								ArrayList							|							CopyOnWriteArrayList	
+																	|
+					-------------------------------------------------------------------------------------------------------------------
+						It is not thread safe						|		It is thread safe because every update operation will be
+																	|		performed on separate cloned copy
+																	|
+						While one thread iterating list object		|		While one thread iterating list object other thread will
+						the other thread are not allowed modify		|		modify with same manner
+						list, otherwise we will get					|
+						ConcurrentModificationException				|
+																	|
+						Iterator is fail-fast						|		Iterator is fail-safe
+																	|
+						Iterator of ArrayList can perform both		|		Iterator of CopyOnWriteArrayList can perform only read 
+						read and remove operation					|		operation but not remove operation otherwise we will get
+																	|		UnsupportedOperation Exception
+																	|
+						Present in java.util package and			|		Present in java.util.concurrent package and introduced in
+						introduced in 1.2 version					|		1.5 version
+				
+				
+				
+				
+						
+					CopyOnWriteArrayList					|				synchronizedList					|			Vector
+															|													|
+				------------------------------------------------------------------------------------------------------------------------------------
+				thread safety because every update 				thread safety because at a time list			thread safety because at a time list
+				operation will perform on separate 				can be accessed by only one thread				can be accessed by only one thread
+				cloned copy
+												
+				
+				At a time multiple thread are allowed			Only one thread allowed at a time to perform  	At a time only one thread allowed 
+				to operate on CopyOnWriteArrayList object		any operation on synchronizedList object		to perform any operation on Vector object
+			
+					
+				while one thread iterating of a this			while one thread iterating it will not allow	while one thread iterating it will not allow
+				object the other threads are allowed			other threads to perform any operation			other threads to perform any operations
+				to modify CopyOnWriteArrayList
+				and we won't get 
+				ConcurrentModifcationException
+				
+				Iterator is fail-safe							Iterator is fail-fast							Iterator is fail-fast
+				
+				Iterator can perform only read but not			Iterator can perform both read and remove 		Iterator can perform both read and remove
+				remove operation otherwise we will get			operations										operations
+				UnSupportedOperation exception
+				
+				Introduced in 1.5 version						Introduced in 1.2 version						Legacy classes. introduced in 1.0 version
+			
+			
+		
+		CopyOnWriteArraySet(C)
+		-----------------------
+		
+												Collection(I)
+													|
+													|
+												   Set(I)
+													|
+													|
+												CopyOnWriteArraySet
+												
+												
+			This concept is implemented based on CopyOnWriteArraySet.
+			For every update operation separate cloned object will create. Write operations will perform on cloned object read operations will
+			perform on main object. So it is a thread safe
+			
+			It is highly recommended for more no.of read operations and less no.of write operations functionalities
+			
+			
+			1. Duplicates not allowed
+			2. Insertion order is preserved (Internally implemented by CopyOnWriteArrayList)
+			3. Heterogeneous objects are allowed
+			4. null values are allowed
+			5. while iterating one thread the another thread will allow update operation. so the iterator is called fail-safe iterator
+			6. Iterator of CopyOnWriteArraySet can't perform remove operation. if we perform remove operation it will throw UnsupportedOperation exception
+			
+			
+			Constructor
+			-----------
+					CopyOnWriteArraySet cowAs = new CopyOnWriteArraySet();
+					
+					CopyOnWriteArraySet cowAs = new CopyOnWriteArraySet(Collection c);
+					
+			methods:
+					No new methods. 
+					
+					
+						
+							CopyOnWriteArraySet						|				synchronizedSet
+																	|
+					---------------------------------------------------------------------------------------------------------
+						thread safe because update operations		|	thread safe because at a time only one thread can
+						will perform on separate cloned object		|	access to operate
+																	|
+						while one thread iterating set, other 		|	One thread allows to perform operations. So we wont	
+						threads are allowed to modify and we wont	|	get ConcurrentModifcationException
+						get ConcurrentModifcationException			|
+																	|
+						Iterator is fail-safe						|	Iterator is fail-fast
+																	|
+						Iterator can perform only read operation	|	Iterator can perform both read and remove operations
+						but not remove operation. if we perform		|
+						remove operation we will get 				|
+						UnsupportedOperationException				|
+																	|
+						Introduced in 1.5 version					|	Introduced in 1.2 version
+						
+																	
+					

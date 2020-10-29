@@ -1,0 +1,139 @@
+														Java 7 Features
+														----------------
+											
+										1. Improved type Inference
+										2. Automatic resource management with try-with-resources
+										3. NIO 2.0
+										4. Exception handling improvements
+												i) 	Suppressed exceptions
+												ii) Catch Multiple Exceptions in catch block
+												
+										5. Number formatting enhancement
+										6. String class support in switch statement
+										7. Binary Literals with prefix “0b”
+										8. ForkJoin Framework
+										9. Automatic reloading with WatchService
+										10.G1 Garbage Collector
+
+										
+1. Improved type Inference
+--------------------------
+	Blank diamond on right side of declaration will work fine
+	Compiler is smart enough in java 7 to identify that blank diamond infer to type defined on left hand side declaration
+		
+		List<String> s = new ArrayList<String>(); // till java 1.6
+		List<String> s = new ArrayList<>(); // From java 1.7
+		
+
+2. Automatic resource management with try-with-resources
+---------------------------------------------------------
+	Usually finally block will use to cleanup resources like closing streams
+	Using try with resources from java7 there is no need to write finally block to cleanup resources.
+	Cleanup happens because of new interface AutoCloseable. Its close method is invoked by JVM as soon try block finishes
+		All pre-defined java classes are implemented AutoCloseable interface
+
+								
+								Till Java 6
+								------------
+								
+								Connection con=null;
+								
+								Statement stmt = null;
+								try{
+									con= DriverManager.getConnection(-,-,-);
+									stmt = con.createStatement();
+								
+								}
+								catch(SQLException se){
+									se.printStackTrace();
+								}
+								finally{
+									try{
+									
+										stmt.close();
+										con.close();
+									}
+									catch(Exception e){}
+										
+								}
+
+								
+								From Java 7
+								------------
+								Connection con=null;
+								
+								Statement stmt = null;
+								try(con= DriverManager.getConnection(-,-,-);
+									stmt = con.createStatement();){
+									
+								
+								}
+								catch(SQLException se){
+									se.printStackTrace();
+								}
+							
+										
+8. ForkJoin Framework:
+----------------------
+	It is a framework that would distribute work across multiple cores and then join them to return the result set
+	Fork-Join breaks the task at hand into mini-tasks until the mini task is simple enough that it can be solved without further breakups
+	It is like divide-and-conquer algorithm and implemented by work steal algorithm
+	
+			Result solve(Problem problem){
+				if(problem is small){
+					directly solve problem
+				}
+				else{
+					split problem into independent tasks
+					fork new subtask to solve each part
+					join all subparts
+					compose result from sub-results
+					
+				}
+			}
+	
+		core classes
+					java.util.concurrent.ForkJoinPool
+					java.util.concurrent.ForkJoinTask(Abstract class)
+										
+		
+		ForkJoinPool(Class)
+		-------------------
+			implementation of java.util.concurrent.ExecutorService interface(implemented work stealing algorithm)
+				
+				ForkJoinPool pool = new ForkJoinPool(numberOfprocessors);
+				
+				ForkJoinPool pool = new ForkJoinPool(); // if we use no arg constructor default it will take available processors
+																by Runtime.getRunTime().availableProcessors();
+		
+			Another main difference of ForkJoinPool and other ExecutorService's is that this pool need not explicitly shutdown upon program exit
+			because all its threads are daemon mode
+			
+			Three ways to submit tasks in ForkJoinPool
+			
+			execute(ForkJoinTask task) -- asynchronous execution. call its fork method to split work between multiple threads
+			invoke(ForkJoinTask task) -- awaits to obtain the result. calll its invoke method on the pool
+			submit(ForkJoinTask task) -- Returns java.util.concurrent.Future object that can use to check status and obtaining result its completion
+			
+			
+		ForkJoinTask(Abstract class)
+		----------------------------
+				It is an abstract class for creating tasks to run within ForkJoinPool.
+		
+			
+				java.util.concurrent.ForkJoinTask(Abstract class)
+												|
+												| extends
+												|
+				------------------------------------------------r--------------------------------					
+				|																				|
+				|																				|
+			java.util.concurrent.RecursiveAction(Abstract class)		java.util.concurrent.RecursiveTask(Abstract class)
+					It will not return value										It will return value
+					protected void compute()											protected V compute()
+			
+				We need to implement compute() in sub class that performs desired by the task
+			
+				It has several methods to check status of task
+					isDone(), isCompletedNormally(), isCancelled(), isCompletedAbnormally()
+			

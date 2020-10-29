@@ -1,0 +1,1131 @@
+										Exception Handling
+										------------------
+
+
+Date: 25th March 2016
+---------------------	
+					1. Introduction
+					2. Runtime stack mechanism
+					3. Default exception handling in java
+					4. Exception hierarchy
+					5. Customized exception handling by using try catch
+					6. Control flow in try catch
+					7. Methods to print exception information
+					8. try with multiple catch blocks
+					9. finally block
+					10.difference between final,finally and finalize
+					11.control flow in try-catch-finally
+					12.control flow in nested try-catch-finally
+					13.various possible combination of try-catch-finally
+					14.throw keyword
+					15.throws keyword
+					16.Exception handling keywords summary
+					17.Various possible compile time errors in exception handling
+					18.Customized or user defined exceptions
+					19.Top -10 exceptions
+					20 1.7 version enhancements
+						1. try with resources
+						2. multi-catch block
+	
+	1.Introduction
+	--------------
+		An unwanted unexpected event that disturbs normal flow of the program is called Exception.
+		It is highly recommended to handle exceptions and the main objective of exception handling is graceful termination of 
+		the program
+		Exception handling does not mean repairing an exception. we have to provide alternative way to continue rest of the program normally is the concept of exception handling
+		For example our program requirement is to read data from remote file locating at london at runtime if london file is 
+		not available our program should not be terminated abnormally. we have to provide some local file to continue rest of
+		the program normally. This way of defining alternative is nothing but exception handling
+				
+					try{
+						//read data from remote file locating at london
+					}	
+					catch(FileNotFoundException e){
+						//use local file and continue rest of the program normally
+					}
+		
+	2.Runtime stack mechanism
+	-------------------------
+		For every thread JVM will create a runtime stack. Each and every method call performed by that thread will be stored
+		in the corresponding stack
+		Each entry in the stack is called Activation record or stack frame.
+		After completing every method call the corresponding entry from the stack will be removed.
+		After completing all method calls the stack will become empty and that empty stack will be destroyed by JVM just before
+		terminating the thread
+		
+			class Test{
+				public static void main(String[] args){
+					doStuff();
+				}
+				
+				public static void doStuff(){
+					doMoreStuff();
+				}
+				public static void doMoreStuff(){
+					sop("Hello");
+				}
+			
+			
+			}
+		
+		
+		
+		|		|		|		|		|		|		|				|		|		|	|		|		|		|	
+		|		|		|		|		|		|		|				|		|		|	|		|		|		|
+		|		|		|		|		|		|		|				|		|		|	|		|		|		|
+		|		|--->	|		|--->	|		| -->	|				|	--->|		|-->|		|		|		|
+		|		|		|		|		|		|		|doMoreStuff	|		|		|	|		| --->	|		|
+		|		|		|		|		|-------|		-----------------		|-------|	|		|		|		|
+		|		|		|		|		|dostuff|		| doStuff		|		|doStuff|	|		|		|		|
+		|		|		---------		|---------		|---------------|		---------	|-------|		|		|
+		---------		| main	|		| main	|		| main			|		| main	|	|main	|		|		|
+						----|-----		---------		----------------		---------	---------		----------
+		Runtime				|
+		stack 				|																				This empty
+		for main		stack frame																			stack will be
+		thread			(or) activation																		destroyed by
+						record																					JVM
+		
+	
+Date:26th March 2016
+--------------------
+	
+	3. Default exception handling in java
+	-------------------------------------
+		1. Inside a method if any exception occurs the method in which it is raised is responsible to create Exception object
+			by including the following information
+				1.Name of exception
+				2.Description of exception
+				3.Location at which exception occurs
+					[stack trace]
+				
+		2. After create Exception object method hand overs object to the JVM
+		3. JVM will check whether the method contains any exception handling or not. If the method does not contain Exception
+			handling code then JVM terminates the method abnormally and removes the corresponding entry from the Stack then JVM
+			identifies caller method and check whether caller method contains any handling code or not. If the caller method 
+			does not contain any handling code then JVM terminates the caller method also abnormally and removes the
+			corresponding entry from the Stack/
+			This process will be continued until main method and if the main method also does not contain handling code then JVM
+			terminates main method also abnormally and removes corresponding entry from the Stack
+			Then JVM hand overs responsibility of exception handling to default exception handler, which is the part of JVM
+			The default Exception handler prints exception information in the following format and terminates program abnormally
+					
+					Exception in thread "XXX" Name of exception : Description Stack Trace
+		
+			Example:1
+			
+			class Test{
+				public static void main(String[] args){
+					doStuff();
+				}
+				
+				public static void doStuff(){
+					doMoreStuff();
+				}
+				public static void doMoreStuff(){
+					sop(10/0);
+				}
+			
+			
+			}
+			o/p: 	
+			
+			Exception in thread "main" java.lang.ArithmeticException: / by zero
+			at HelloWorld.doMoreStuff(HelloWorld.java:11)
+			at HelloWorld.doStuff(HelloWorld.java:5)
+			at HelloWorld.main(HelloWorld.java:15)
+						
+		Note: In a program if atleast one method terminates abnormally then the program termination is abnormal termination
+		If all methods terminated normally then only program termination is normal termination
+	
+	4. Exception Hierarchy
+	----------------------
+		Throwable class acts as root for java exception hierarchy. Throwable class defines two child classes
+			1. Exception
+			2. Error
+		
+		1. Exception
+		------------
+			Most of the times exceptions are caused by our program and these are recoverable. For example if our programme
+			requirement is to read data from remote file locating at london at runtime if remote file is not available then
+			we will get runtime exception saying FileNotFoundException.
+			If FileNotFoundException occurs we can provide local file and continue rest of the program normally 
+					try{
+						//read data from remote file locating at London
+					}
+					catch(FileNotFoundException fof){
+						// use local file and continue rest of the program normally
+					}
+			
+		2. Error
+		--------
+			Most of the time errors are not caused by our program and these are due to lack of system resources.
+			Errors are non recoverable. fro example if outofmemoryError occurs being a programmer we can't do anything
+			and the program will be terminate abnormally. system admin or server admin is responsible to increase heap memory
+			
+			
+		
+													Throwable
+														|
+														|
+														|
+								---------------------------------------------------------------------------------
+								|																				|
+								|																				|
+								|																				Error
+							Exception																			|
+								|																	-------------------------	
+								|																	|			|		| .....
+								|																	VMError	Assertion	Excep
+	--------------------------------------------------------------------------							|		Error	tionIN
+	|						|					|			|											|				itializ	
+	|						|					|			|			...							--------			erError
+	RuntimeException	ServletException	IOException		RemoteException							|		|
+		|-- AE									|													Stack	OutofMemoryError
+		|-- NPE									|--FileNotFoundException							OverFlowError
+		|-- CCE									|--EOFException	
+		|-- IndexOutofBoundException			|--InterruptedIOException
+		|		|
+		|		|-- ArrayIOBE
+		|		|
+		|		|-- StringIOBE
+		|-- IllegalArgumentException
+		|		|
+		|		|-- NumberFormatExceptin
+		|		|
+		
+	
+Date: 27th March 2016
+----------------------
+	
+	Checked exceptions vs unchecked exceptions
+	------------------------------------------
+		The exceptions which are checked by compiler for smooth execution of the program are called checked Exceptions.
+			FileNotFoundException, InterruptedException
+		In our program if there is a chance of raising checked exception then compulsory we should handle that checked exception
+		(either by try catch or by throws keyword) otherwise we will get compile time error
+		
+			The exceptions  which are not checked by compiler whether programmer handling or not such type of exceptions are called
+		unchecked exceptions
+			ArithmeticException, NullPointerException
+		
+		Note: 
+			whether it is checked or unchecked every exception occurs at runtime only. There is no chance of occurring exception at compile time
+			RuntimeException and its child class, error and its child classes are unchecked Exceptions except these remaining
+			are checked exceptions
+	
+	Fully checked vs partially checked
+	-----------------------------------
+		A checked exception said to be fully checked if and only if all its child classes also checked
+			ex: IOException,InterruptedException
+			
+		A checked exception said to be patilaly checked if and only if some of its child classes are unchecked
+			ex: Exception, Throwable
+		
+		Note: The only possible partially checked Exceptions in java are Exception, Throwable
+
+		Describe the behavior of folowing Exceptions
+			1. IOException			-- checked (fully checked)
+			2. RuntimeException 	-- unchecked
+			3. InterruptedException	-- checked (fully checked)
+			4. Error				-- unchecked
+			5. Throwable			-- checked (partially checked)
+			6. ArithmeticException	-- unchecked
+			7. NullPointerException	-- unchecked
+			8. Exception			-- checked (partially checked)
+			9. FileNotFoundException-- checked (fully checked)
+			
+	
+	Customized exception handling by using try catch
+	------------------------------------------------
+		It is highly recommended to handle exceptions. the code which may raise exception is called risky code and we have to
+		define that code inside try block and corresponding handling code we have to define inside catch block
+			
+				try{
+					//risky code
+				}
+				catch(Exception e){
+					//Handling code
+				}
+		
+			Without try-catch 															with try catch
+			------------------															---------------
+			class Test{																	class Test{
+				public static void main(String[] args){							public static void main(String[] args){
+					sop("Hello");													sop("Hello");
+					sop(10/0);														try{
+					sop("finished");													sop(10/0);
+																					}
+				}																	catch(ArithmeticException e){
+																						sop(10/2);
+			}																		}
+																					sop("finsihed");
+																				}
+			Abnormal termination													Normal termination
+			---------------------													------------------
+		
+		Control flow of try-catch
+		-------------------------
+			try{							case1: 1,2,3,5 (Normal termination)
+				stmt1;						case2: If an exception raised at stmt2 and corresponding catch block matched
+				stmt2;								1,4,5 (Normal termination)
+				stmt3;						case3: If an exception raised at stmt2 and corresponding catch block not matched	
+			}										1 (Abnormal termination)
+			catch(Exception e){				case4: If an exception raised at stmt4 or stmt5 then it is always abnormal  
+				stmt4;								termination
+			}
+			stmt5;
+													
+		Note1: Within the try block if anywhere an exception raised then rest of the try block wont be executed eventhough 
+			we handled that exception. Hence within try block we have to take only risky code and length of try block should be
+			as less as possible
+		Note2: In addition to try block there may be a chance of raising an exception inside catch and finally blocks	
+				If any statement which is not part of try block and raises an exception then it is always abnormal termination
+	
+		Methods to print exception information
+		--------------------------------------
+			Throwable class defines the following methods to print exception information 
+				
+						method					|						Printable format
+												|
+			-------------------------------------------------------------------------------------------------------
+				1. printStackTrace				| Name of exception: Description stack trace
+												|
+			-------------------------------------------------------------------------------------------------------
+				2. toString						| Name of exception: Description
+												|
+			--------------------------------------------------------------------------------------------------------
+				3. getMessage					| Description
+												|
+			-------------------------------------------------------------------------------------------------------
+				
+			Example
+					
+					class Test{
+						public static void main(String[] args){
+							try{
+								sop(10/0);
+							}
+							catch(ArithmeticException e){
+								e.printStackTrace();//java.lang.ArithmeticException:/ by zero at Test main()
+								sop(e) or sop(e.toString()) ; //java.lang.ArithmeticException:/ by zero
+								sop(e.getMessage()); // /by zero
+							}
+						
+						}
+					}
+		
+			
+		try with Multiple catch blocks
+		------------------------------
+			The way of handling an exception is varied from exception to exception. Hence for every exception type it is
+			highly recommended to take separate catch block i.e., try with multiple catch blocks always possible and
+			recommended to use
+			
+				try{													try{
+						
+					//risky code											//risky code
+				}														}
+				catch(Exception e){										catch(ArithmeticException e){
+																			//perform arithmetic operations
+				}														}
+																		catch(SQLException e){
+				// worst code												//use mysql db instead of oracle db
+																		}
+																		catch(FileNotFoundException e){
+																			//use local file instead of remote file
+																		}
+																		catch(Exception e){
+																			//default exception handling
+																		}
+																		
+																		//Best programming practice
+																		
+			If try with multiple catch blocks present then the order of catch blocks is very important. We have to take child
+			first and then parent otherwise we will get compile time error saying 
+				exception XXX has already been caught 
+			
+				try{																	try{
+					//risky code															//risky code
+				}																		}
+				catch(Exception e){														catch(ArithmeticException e){
+				
+				}																		}
+				catch(ArithmeticException e){											catch(Exception e){
+				
+				}																		}
+				//compile time error: java.lang.ArithmeticException						//valid
+				has already been caught
+			
+			
+			We can't declare two catch blocks for the same exception otherwise we will get compile time error 
+				
+				try{
+					//risky code
+				}
+				catch(ArithmeticException e){
+				
+				}
+				catch(ArithmeticException e){
+				
+				}
+				//compile time error: java.lang.ArithmeticException has already been caught
+	
+	
+	final
+	-----
+		final is the modifier applicable for classes methods and variables. 
+		If a class declared as final then we can't extend that class i.e., we can't create child class for that class i.e.,
+		inheritance is not possible for final classes
+		If a method is final then we can't override that method in the child class
+		If a variable declared as final then we can't perform re-assignment for that variable
+		
+	finally
+	-------
+		finally is a block is always associated with try catch to maintain clean up code
+				try{
+					//risky code
+				}
+				catch(Exception e){
+					//handling code
+				}
+				finally{
+					//clean up code
+				}
+		The specialty of finally block is it will be executed always irrespective of whether exception is raised or not raised
+		and whether handled or not handled
+		
+	finalize()
+	----------
+		finalize is a method always invoked by garbage collector just before destroying an object to perform clean up 
+		activities. once finalize() completes immediately garbage collector destroys that object
+		
+	Note: finally block is responsible to perform clean up activities related to try block i.e., whatever resources we opened
+	as part of try block will be closed inside finally block whereas finalize() is responsible to perform clean up activities
+	related to object i.e., whatever resources associated with the object will be deallocated before destroying an object by
+	using finalize()
+	
+	various possible combination of try-catch-finally
+	--------------------------------------------------
+		1. In try-catch-finally order is important
+		2. Whenever we are writing try compulsory we should write either catch or finally otherwise we will get compile time 
+			error i.e., try without catch or finally is invalid
+		3. Whenever we are writing catch block compulsory try block must be required i.e., catch without try is invalid
+		4. Whenever we are writing finally block compulsory we should write try block i.e., finally without try is invalid
+		5. Inside try catch and finally blocks we can declare try catch and finally blocks i.e., nesting of try catch finally
+			is allowed
+		6. For try-catch-finally blocks curly braces are mandatory
+	
+
+Date:29th March 2016
+---------------------
+	
+	throw keyword (or) throw clause (or) throw statement
+	----------------------------------------------------
+		
+					0										0
+					|	---> Exception object <------		|
+				   / \									   / \
+				Programmer									JVM
+		
+		
+		Sometimes we can create exception object explicitly we can handover to the JVM manually. For this we have to use
+		throw keyword 
+				
+					throw 	new ArithmeticException("/ by Zero");
+					-----		-------------------------------------
+					 |					|---> Creation of ArithmeticException object explicitly
+					 |
+					 | --> handover created exception object to the JVM
+					 
+		Hence the main objective of throw keyword is to handover our created exception object to the JVM 
+		
+		Hence the result of following two program is exactly same
+		
+		class Test{															class Test{
+		
+			public static void main(String[] args){						public static void main(String[] args){
+			
+				sop(10/0)													throw new ArithmeticException("/by zero");
+			}															}
+		
+		}																}
+		output:																OUTPUT:
+		Exception in thread main: java.lang.ArithmeticException				Exception in thread main: 
+		at Test main()														java.lang.ArithmeticException at Test main();
+		
+		In this case main() is responsible to create exception			In this case programmer creating exception object
+		object and handover to the JVM										explicitily and handover to the JVM manually
+		
+	Note: Best use of throw keyword is for user defined exceptions or customized Exceptions
+	
+	case1:
+		
+		throw e; // If e refers null then we will get NullPointerException
+		
+		class Test{																	class Test{
+			static ArithmeticException ae = new ArithmeticException();					static ArithmeticException ae;
+			public static void main(String[] args){										public static void main(String[] a){
+				throw e;																	throw e;
+			}																			}
+			
+		}																			}
+		RuntimeException:																	RuntimeException:
+		ArithmeticException																		NullPointerException
+		
+	case 2:
+		After throw statement we are not allowed write any statement directly otherwise we will get compile time error
+		saying unreachable statement
+		
+		class Test{																	class Test{
+			
+			public static void main(String[] args){										public static void main(String[] a){
+				sop(10/0);																	throw new ArithmeticException();
+				sop("Hello");																sop("Hello");
+			}																			}
+			
+		}																			}
+		RuntimeException:															compile time error: unreachable statement
+		ArithmeticException															
+		
+	
+	case 3:
+		We can use throw keyword only for throwable types. If we are trying to use for normal java objects we will get
+		compile time error saying "incompatible types"
+		
+		
+		class Test{																	class Test extends RuntimeException{
+			
+			public static void main(String[] args){										public static void main(String[] a){
+				throw new Test();															throw new Test();
+			}																			}
+			
+		}																			}
+		compile time error: incompatible types										RuntimeException: exception in thread
+		found:Test required java.lang.Throwable										main: Test at Test.main()
+		
+	
+Date: 29th March 2016
+---------------------
+		throws Keyword
+		--------------
+			In our program if there is a possibility raising checked exception then compulsory we should handle that checked 
+			exception otherwise we will get compile time error saying
+				UnreportedException XXX must be caught or declared to be thrown
+			
+			Example1:
+			---------
+				import java.io.*;
+				class Test{
+					public static void main(String[] args){
+						PrintWriter pw = new PrintWriter("abc.txt");
+						sop("Hello");
+					
+					}
+				
+				}
+				
+				compile time error: unreportedException java.io.FileNotFoundException must be caught or declared to be thrown
+		
+			Example2:
+			---------
+				
+				class Test{
+					public static void main(String[] args){
+						Thread.sleep(10000);
+					}
+				
+				}
+				
+				compile time error: unreportedException java.lang.InterruptedException must be caught or declared to be thrown
+		
+		we can handle this compile time error by using the following two ways
+			
+		1. By using try-catch
+		---------------------
+			,class Test{
+					public static void main(String[] args){
+						try{
+							Thread.sleep(10000);
+						}
+						catch(InterruptedException e){
+						}
+					}
+		
+		2. By using throws Keyword
+		--------------------------
+			we can using throws keyword to delegate responsibility of exception handling to the caller(It may be another method
+			or JVM) then caller method is responsible to handle that Exception
+				
+				class Test{
+					public static void main(String[] args) throws InterruptedException{
+						Thread.sleep(10000);
+					}
+				
+					}
+			throws keyword required only for checked exception and usage of throws keyword for unchecked exception there is no
+			use or impact
+			throws keyword required only to convince compiler and usage of throws keyword does not prevent abnormal termination
+			of the program
+			
+				class Test{
+					
+					public static void main(String[] args)throws InterruptedException{
+						doStuff();
+					}
+					public static void doStuff() throws InterruptedException{
+						doMoreStuff();
+					}
+					public static void doMoreStuff() throws InterruptedException{
+						Thread.sleep(10000);
+					}
+				
+				
+				}
+			In the above program if we remove atleast one throws statement then the code wont compile
+			
+												|
+												|--> 1.we can use delegate responsibility of exception handling to the caller
+												|		it may be a method or JVM
+												|
+												|--> 2.It is only for checked exception and usage of unchecked exception
+				-------------------------		|		there is no impact
+				|		throws			|		|
+				|		clause			|-------|-->3. It is required only convince to compiler and usage of throws doesn't
+				|						|		|		prevent abnormal termination of the program
+				|------------------------
+	
+			Note: It is recommended to use  try catch over throws keyword
+		
+		
+		case 1:
+		-------
+			we can use throws keyword for methods and constructors but not for classes
+					class Test throws Exception{ // not valid
+						Test() throws Exception{
+						
+						}
+						public void m1() throws Exception{
+						
+						}
+					
+					}
+					
+		case 2:
+		-------
+			we can use throws keyword only for Throwable types. If we are trying to use normal java classes then we will get
+			compile time error saying incompatible types
+			
+				class Test{													class Test extends RuntimeException{
+					public void m1() throws Test{								public void m1() throws Test{
+					
+					}															}
+				
+				}															}
+				compile time error: incompatible types								valid
+				found Test required java.lang.Throwable
+				
+		case 3:
+		------
+		
+			class Test{														class Test{
+				public static void main(String[] args){							public static void main(String[] args){
+				
+					throw new Exception();											throw new Error();
+				}																}
+			
+			}																}
+			
+			compile time error: unreported exception java.lang.				Runtime exception: Exception in thread main()
+			Exception must be caught or declared to be thrown				java.lang.Error at test main()
+			
+		
+		case 4:
+		-------	
+			Within the try block if there is no chance of raising exception then we can't write catch block for that exception
+			otherwise we will get compile time error saying 
+			
+				Exception XXX is never thrown  in body of corresponding try statement
+			But this rule is applicable only for fully checked exceptions
+			
+			1.	class Test{														2.	class Test{
+				
+					public static void main(String[] args){							public static void main(String[] args){
+						try{															try{
+							sop("hello");													sop("hello");
+						}																}
+						catch(ArithmeticException ae){									catch(Exception e){
+						
+						}																}
+					}
+																					}
+					
+				}																}
+			output : hello														output:hello
+			
+			
+			3.	class Test{														4.	class Test{
+				
+					public static void main(String[] args){							public static void main(String[] args){
+						try{															try{
+							sop("hello");													sop("hello");
+						}																}
+						catch(IOException e){ //fully checked						catch(InterruptedException e){ // fully
+													exception												checked exception
+						}																}
+					}
+																					}
+					
+				}																}
+			compile time error:exception: java.io.IOException					compile time error: 
+			is never thrown in body of corresponding try statement				java.lang.InterruptedException is never thrown
+																				in body of corresponding try statement
+																				
+																				
+			5.	class Test{
+			
+				public static void main(String[] args){
+					try{
+						sop("hello");
+					}
+					catch(Error e){
+					
+					}
+				}
+			
+			}
+			output: hello
+			
+	
+	Exception Handling keywords summary
+	------------------------------------
+		try 	--> to maintain risky code
+		catch 	--> To maintain exception handling
+		finally	--> to maintain cleanup code
+		throw	--> to handover our created exeption object to the JVM manually
+		throws	--> to delegate responsibility of exception handling to the caller
+		
+	
+	various possible compile time errors in exception handling
+	----------------------------------------------------------
+		1. unreported exception XXX; must be caught or declared to be thrown
+		2. Exception XXX has already been caught
+		3. Exception XXX is never thrown in body of corresponding try statement
+		4. Unreachable statement
+		5. Incompatible types found Test required java.lang.Throwable 
+		6. try without catch or finally
+		7. catch without try
+		8. finally without try
+	
+	
+	Customized or User defined exceptions
+	-------------------------------------
+		Sometimes to meet programmer requirement we can define our own exception such type of exceptions are called 
+		Customized or user defined exceptions
+		
+		
+		class TooYoungException extends RuntimeException{
+			
+			public TooYoungException(String s){
+				super(s); // to make description available to default exception handler
+			}
+		
+		}
+		
+		class TooOldException extends RuntimeException{
+			
+			public TooOldException(String s){
+				super(s);
+			}
+		
+		}
+		
+		class CustomExceptionDemo{
+		
+			public static void main(String[] args){
+				int age = Integer.parseInt(args[0]);
+				if(age<18){
+					throw new TooYoungException("Plz wait for some more time .. You will get best match");
+				}
+				else if(age>60){
+					throw new TooOldException("Your age is crossed already marriage age.. no chance of getting marriage");
+				}
+				else{
+					sop("You will get match details soon by email");
+				}
+			
+			}
+		
+		}
+		
+		Note: 
+			1. throw keyword is best suitable for user defined or customized exceptions but not for predefined exceptions
+			2. It is highly recommended to define customized exception as unchecked i.e, we have to extends runtime exception
+				but not exception 
+		
+	
+Date:30th March 2016
+--------------------
+	
+	Top 10 Exceptions
+	-----------------
+		Based on the person who is raising an exception all exceptions are divided into two types
+			1. JVM exception
+			2. Programmatic exception
+		
+		1. JVM exception:
+		-----------------
+			The exception which are raised automatically by JVM, whenever a particular event occurs are called JVM excetion
+				Ex: ArithmeticException, NullPointerException  etc.,
+		
+		2. Programmatic Exception
+		---------------------------
+			The exception which are raised explicitily either by programmer or by API developer to indicate the something goes
+			wrong are called Programmatic exception
+				Ex: TooOldException, IllegalArgumentException
+		
+		i) ArrayIndexOutofBoundsException
+		---------------------------------
+			It is the child class of RuntimeException and hence it is unchecked raised automatically by JVM whenever we are
+			trying to access array elements with out of range index
+				
+					int[] x = new int[3];
+					
+					sopln(x[0]);
+					sopln(x[10]); RuntimeException : ArrayIndexOutofBoundsException
+					sopln(x[-10]);RuntimeException : ArrayIndexOutofBoundsException
+		
+		ii) NullPointerException:
+		-------------------------
+			It is the child class of RuntimeException and hence it is unchecked raised automatically by JVM whenever we are
+			trying to perform any operation on null
+
+				String s=null;
+				sop(s.length()); RuntimeException : NullPointerException
+		
+		iii) ClassCastException
+		------------------------
+			It is the child class of RuntimeException and hence it is unchecked raised automatically by JVM whenever we are 
+			trying to type cast parent object to child type
+			
+				String s = new String("K");			Object o = new Object();				Object o = new String("K");
+				Object o = (Object)s;				String 	s =(String)o;					String s = (String)o;
+				
+					valid							RuntimeException: ClassCastException		valid
+			
+			
+		iv) StackOverFlowError
+		----------------------
+			It is the child class of error and hence it is unchecked raised automatically by JVM whenever we are trying to 
+			perform recursive method call
+			
+			
+			public class HelloWorld{
+
+				public static void m1(){
+					
+				   // System.out.println("m1 called");
+					m2();
+				}
+				
+				public static void m2(){
+					
+					//System.out.println("m1 called");
+					m1();
+					
+				}
+				 public static void main(String []args){
+					
+					m1();
+				 }
+			}
+			RuntimeException: StackOverFlowError
+			
+		v) NoClassDefFoundError:
+		------------------------
+			It is the child class of error and hence it is unchecked raised automatically by JVM whenever JVM unable to find
+			required .class file
+					
+					java Test
+			If Test.class is not available then we will get RuntimeException saying NoClassDefFoundError:Test
+		
+		vi) ExceptionInInitializerError:
+		--------------------------------
+			It is the child class of error and hence it is unchecked raised automatically by JVM if any exception occurs while 
+			executing static variables assignment and static blocks
+			
+				class Test{														class Test{
+					static int x=10/0;												static{
+				}																		String s = null;
+																						sop(s.length());
+			RuntimeException: ExceptionInInitializerError							}
+			caused by java.lang.ArithmeticException								}
+																			RuntimeException: ExceptionInInitializerError
+																			caused by java.lang.NullPointerException
+		
+		
+		vii) IllegalArgumentException:
+		------------------------------
+			It is the child class of RuntimeException and hence it is unchecked raised explicitly either by the programmer or by api developer to indicate that a method has been invoked with illegal argument
+			
+				The valid range of Thread priorities is 1 to 10. If we are trying to set priority with any other value then 
+				we will get RuntimeException saying IllegalArgumentException
+							Thread t = new Thread();
+							t.setPriority(7) //valid
+							t.setPriority(15) //RuntimeException: IllegalArgumentException
+		
+		viii) NumberFormatException
+		---------------------------
+			It is the direct child class of IllegalArgumentException which is the child class of RuntimeException and hence it
+			is unchecked raised explicitly either by programmer or by api developer to indicate that we are trying to convert
+			string to number and the string is not properly formatted 
+			
+					int i = Integer.parseInt("10");
+					int j = Integer.parseInt("ten"); //RuntimeException saying NumberFormatException;
+		
+		ix) IllegalStateException
+		-------------------------
+			It is the child class of RuntimeException and hence it is unchecked raised explicitly either by the programmer or
+			api developer to indicate that a method has been invoked at wrong time 
+				After starting of a thread we are not allowed to restart same thread once again otherwise we will get
+				RuntimeException saying IllegalThreadStateException
+					
+						Thread t = new Thread();
+						t.start();
+							.
+							.
+							.
+							.
+						t.start() // RuntimeException: IllegalThreadStateException
+		
+		x) AssertionError
+		------------------
+			It is the child clss of error and hence it is unchecked and it is raised explicitily by programmer or api developer
+			to indicate that assert statement fails
+				If x is not greater than 10 then we will get RuntimeException saying AssertionError
+				assert(x>10) RuntimeException: AssertionError
+		
+		
+		
+								Exception/Error					|		raised by
+																|
+				-------------------------------------------------------------------------------------------
+					1. ArrayIndexOutofBoundsException-----------------------			
+																|			|
+					2. NullPointerException						|			|
+																|			|
+					3. ClassCastException						|			|--> Raised automatically by
+																|			|		JVM and hence these are
+					4. StackOverFlowError						|			|		JVM Exceptions
+																|			|
+					5. NoClassDefFoundError						|			|	
+																|			|
+					6. ExceptionInInitializerError-------------------------
+																|
+					7. IllegalArgumentException ----------------------------
+																|			|
+					8. NumberFormatException						|			|--> Raised by programmer or api developer
+																|			|		Hence these are Programmatic exeptions
+					9. IllegalStateException					|			|
+																			|
+					10. AssertionError		--------------------------------
+				
+				--------------------------------------------------------------------------------------------------
+			
+		
+	
+	1.7 Version enhancements with respect to exception handling
+	-----------------------------------------------------------
+		
+		As part of 1.7 version in exception handling the following two concepts introduced
+				1. try with resources
+				2. Multi catch block
+		
+		1. try with resources
+		---------------------
+			Until 1.6 version it is highly recommended to write finally block to close resources which are opened as 
+			part of try block 
+			
+				BufferedReader br = null;
+				try{
+					br = new BufferedReader(new FileReader("input.txt"));
+					// use br based on our requirement
+					
+				}
+				catch(IOException e){
+					//handling code
+				}
+				finally{
+					if(br!=null){
+						br.close();
+					}
+				}
+			
+			The problem in this approach are 
+				1. Compulsory programmer is required to close the resources inside finally block. It increases complexity of
+					programming
+				2. We have to write finally block compulsory and hence it increases length of the code and reduces readability
+				
+			To overcome above problem SUN people introduced try with resources in 1.7 version. 
+			The main advantage of try with resources is whatever resources we open as part of try block  will be closed
+			automatically once control reaches end of try block either normally or abnormally. Hence we are not required to
+			close explicitly. so that complexity of programming will be reduced
+			we are not required to write finally block so that length of the code will be reduced and readability will be
+			improved
+			
+			try(BufferedReader br = new BufferedReader(new FileReader("input.tx"))){
+				------------------------------------------------------------------	
+										|
+										|---> resources
+					// use br based on our requirement
+					// br will be closed automatically once controll reaches end of try block either normally or abnormally
+					
+					
+			}
+			catch(IOException ie){
+				//handling code
+			}
+			
+			we can declare multiple resources but these resources should be  separated with semi colon (;)
+				
+							try(R1;R2;R3){
+								-----
+								----
+								----
+							
+							}
+			
+			Example: 
+				try(FileWriter fw=new FileWriter("customer.txt"); FileReader fr = new FileReader("test.txt")){
+					--------------------------------------------- -----------------------------------------
+										R1											R2
+				
+				
+				}
+			
+			All resources should be AutoClosable resources. A resource is said to be AutoClosable if and only if corresponding
+			class implements java.lang.AutoClosable interface. All I/O related resources database related resources and 
+			network related resources are already implemented AutoClosable interface. Being a programmer we are not required
+			to do anything just we should aware the point. 
+			AutoClosable interface came in 1.7 version and it contains only one method close()
+				public void close();
+			
+			All resource reference variables are implicitly final and hence within the try block we can't perform 
+			re-assignment otherwise we will get compile time error
+			
+				import java.io.*;
+				
+				class TryWithResources{
+					public static void main(String[] args){
+						try(BufferedReader br = new BufferedReader(new FileReader("in.txt"))){
+							br = new BufferedReader(new FileReader("out.txt"))
+						}
+					
+					}
+				
+				}
+				
+				compile time error: auto-closeable resource br may not be assigned
+			
+			Until 1.6 version try should be associated with either catch or finally but from 1.7 version onwards we can
+			take only try with resource without catch or finally
+					
+					try(R){
+					
+					}
+					//valid
+			
+			The main advantage of try with resources is we are not required to write finally block explicitly because
+			we are not required to close resources explicitly. Hence until 1.6 version finally block is just like hero
+			but from 1.7 version onwards It is dummy and becomes zero
+		
+				
+		2. Multi-catch block
+		---------------------
+			Until 1.6 version even though multiple different exceptions having same handling code. For every exception type
+			we have to write separate catch block. It increases length of code and reduces readability
+			
+					try{
+					
+					}
+					catch(ArithmeticException ae){
+						ae.printStackTrace();
+					}
+					catch(IOException ie){
+						ie.printStackTrace();
+					}
+					catch(NullPointerException e){
+						sop(e.getMessage());
+					}
+					catch(InterruptedException e){
+						sop(e.getMessage());
+					}
+			
+			To overcome this problem SUN people introduced multi-catch block in 1.7 version. According to this we can write
+			a single catch block that can handle multiple different type of exceptions
+			
+				try{
+				
+				}
+				catch(ArithmeticException | IOException e){
+					e.printStackTrace();
+				}
+				catch(NullPointerException | InterruptedException){
+					sop(e.getMessage());
+				}
+			
+			The main advantage of this approach length of code will be reduced and readability will be improved
+			
+					class MultiCatchBlock{
+					
+						public static void main(String[] args){
+							try{
+								
+									String s = null;
+									sop(s.length());
+								
+								Sop(10/0);
+							
+							}
+							catch(ArithmeticException | NullPointerException e){
+								sop(e.getMessage());
+							}
+						
+						}
+					
+					
+					}
+				
+				in the above example whether raised exception is either ArithmeticException or NullPointerException the 
+				same catch block can listen
+				
+				In multi-catch block there should not be relation between exception types (either child to parent or parent 
+				to child or same type) otherwise we will get compile time error
+				
+					try{
+					
+					}
+					catch(ArithmeticException |Exception e){
+						e.printStackTrace();
+					}
+					//compile time error: Alternative in multi-catch statement cannot be related by subclassing
+			
+			
+		Exception Propagation
+		----------------------
+			Inside a method if an exception raised and if we are not handling that exception then exception object will be 
+			propagated to caller then caller method is responsible to handle exception. This process is called exception 
+			propagation
+			
+		Rethrowing exception
+		--------------------
+			We can use this approach to convert one exception to another exception
+			
+				try{
+					sop(10/0);
+				}
+				catch(ArithmeticException e){
+					throw new NullPointerException();
+				}
+			
+							

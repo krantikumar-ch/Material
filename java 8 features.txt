@@ -1,0 +1,2118 @@
+
+															
+															Java 8 Features
+														----------------------
+													1. Lambda expression
+													2. Functional interfaces
+													3. Defaults methods in interfaces
+													4. Static methods in interfaces
+													5. Predicate
+													6. Function				5 to 7 are pre-defined functional interfaces
+													7. Consumer
+													8. Method reference & Constructor references double colon(::) operator
+													9. Stream api
+													10.Date & Time api (joda api)
+															joda.org
+																...
+
+Main benefits
+
+	1. Simplify programming
+	2. To utilize functional programming
+		Java 8 enables functional programming in form of lambda expression. 
+		java is an object oriented program but we will get benefits of functional programming even in java 8 also
+	3. To enable Parallel processing in the form of parallel streams
+	
+											
+1. Lambda expression
+--------------------
+	
+	Main objectives are
+		1. enable functional programming in java
+		2. write more readable, concisable & maintainable code
+		3. Use api's easily & effectively
+		4. To enable parallel processing
+		
+	
+	A lambda expression is an anonymous function
+								|
+								| --> Not having any name
+								|
+								| --> Not having modifier
+								|
+								| --> Not having return types
+	
+	Ex 1 : print hello in lambda expression
+					Method													Lambda expression
+				public void m1(){											() -> {
+					System.out.println("Hello");								System.out.println("Hello");
+				}															}
+	Ex 2: add two numbers as parameters and print
+					Method														Lambda expression
+				public void m1(int a, int b){								(int a, int b) -> {
+					System.out.println(a+b);									System.out.println(a+b);
+				}															}
+	Ex 3: get length of a given string
+					Method														Lambda expression
+				public void getLength(String s){							(String s) -> {
+					return s.length();											return s.length();
+				}															}	
+	
+	If the body of lambda expressions contains only one statement. curly braces are optional
+	
+	Ex 1 : print hello in lambda expression
+					Method													Lambda expression
+				public void m1(){											() -> System.out.println("Hello"); 
+					System.out.println("Hello");								
+				}
+				
+	Based on the context, compiler will guess parameter types automatically (Type inference) then we can remove types also. 
+	
+	Ex 2: add two numbers as parameters and print
+					Method														Lambda expression
+				public void m1(int a, int b){									(a, b) -> System.out.println(a+b);
+					System.out.println(a+b);									
+				}														
+				
+	If lambda expression return some values. Based on situation compiler will guess automatically ,we are not required to write return keyword.
+	If it is a single parameter. No need to keep in parenthesis
+	
+	Ex 3: get length of a given string
+					Method														Lambda expression
+				public void getLength(String s){								(s) -> return s.length();
+					return s.length();													|
+																						|
+				}																(s) -> s.length();
+																						|
+																						|
+																				 s -> s.length();
+																				 
+	
+	Characteristics
+	----------------
+		1. Lambda expression can take any no.of parameters
+		
+				Ex:  () -> System.out.println("Hello");
+					(s) ->  return s.length();
+				  (a,b) -> System.out.println(a+b);
+				  
+		2. If multiple parameters presents these parameters should be seperated with comma(,)
+		
+				Ex: (a,b) -> System.out.println(a+b);
+					
+		3. If lambda expression has one parameters then parenthesis is optional
+				
+				Ex:(s) -> s.length() --------------->  s -> s.length();
+				
+		4. Usually we can specify the type of parameter, If the compiler can guess the type automatically based on context then we can remove the type(Type Inference)
+		
+				Ex: (int a,int b) ->  System.out.println(a+b) -------------> (a,b) -> System.out.println(a+b);
+		
+		5. If body contains multiple number of statements then we should write curly braces, If code contain only one statement then curly braces are not required.
+		
+				Ex: () -> {
+							statement 1;
+							statement 2;
+							statement 3;
+						  }
+						  
+				    () -> statement;
+				
+		6. If the lambda expression return something , compiler will guess automatically , no need to write return keyword.
+		
+				Ex: s ->  return s.length(); ---------> s -> s.length();
+				
+	Functional Interface:
+	---------------------
+		Once we write lambda expression we need invoke lambda expression for that we need functional interface.
+		An interface which contains only one abstract method then it is called Functional interface. we will use functional interface to invoke lambda expression.
+				Ex: 
+					Runnable --> contains only one method called run()
+					Callable --> contains only one method called call()
+					Actionlistener --> contains only one method called actionPerformed()
+					Comparable --> contains only one method called compareTo()
+			
+		Restriction is applicable for only for abstract method. we can take n number of default method in functional interface.
+		
+				Ex: 
+				interface Inter
+				{
+					public void m1();
+					
+					default void m2(){
+					
+					}
+					public static void m3(){
+					
+					}
+					
+			    }
+				
+				The above one is functional interface.
+				
+				interface Inter
+				{
+					public void m1();
+					
+					public void m2();
+					
+			    }
+				
+				The above one is not functional interface, it is normal interface.
+				
+		To specify an interface as functional interface java people introduced one annotation in 1.8 version that is @FunctionalInterface.
+		If we are using the annotation or not, an interface which contains only one abstract method is always consider as functional interface.  But to tell compiler
+		to make sure we are not making any mistake while writing interface or we need to maintain this interface as functional explicitly we need to write @FunctionalInterface.
+		
+				Ex:
+						@FunctionalInterface
+						interface Interf
+						{
+						public void m1();
+						
+						default void m2(){					---------> compile successfully
+						
+						}
+						public static void m3(){
+						
+						}
+						}
+						
+						
+				Ex: 	@FunctionalInterface
+						interface Interf
+						{
+						public void m1();
+						
+						public void m2();					---------> compile time error : Unexpected @FunctionalInterface annotation
+																							multiple non-overriding abstract methods present in interface Interf
+																							
+						}
+						
+							
+				Ex: 	@FunctionalInterface
+						interface Interf
+						{
+															---------> compile time error : Unexpected @FunctionalInterface annotation
+																							no abstract method found in interface Interf
+																							
+						}
+		
+		
+		Functional interface w.r.t inheritance
+		---------------------------------------
+			
+			case 1: if an interface extends Functional interface and child interface does not contain any new abstract method then child interface
+			is also can be consider as functional interface
+				
+				@FunctionalInterface
+				interface i1{
+				
+					public void m1();
+					
+				}
+				
+				@FunctionalInterface
+				interface i2 extends i1{
+					
+				}
+				
+			case 2: In the child interface, we can define exactly as same parent interface abstract method
+			
+				@FunctionalInterface
+				interface i1{
+					public void m1();
+				}
+				
+				@FunctionalInterface
+				interface i2 extends i1{
+					public void m1();
+				}
+			
+			case 3: In the child interface, we can't define any new abstract method. if we try to define we will get compile time error
+				
+				@FunctionalInterface
+				interface P{
+					public void m1();
+				}
+				@FunctionalInterface
+				interface c extends P{
+					public void m2();
+				}
+				compile time error: unexpected @FunctionalInterface c is not a functional interfaces	
+				multiple non-overriding abstract methods found in interface c
+			
+			case 4: 
+				
+				@FunctionalInterface
+				interface P{
+					public void m1();
+				}
+				
+				interface c extends P{
+					public void m2();
+				}
+				Compiled successfully because interface c does not have @FunctionalInterface annotation
+				
+		Example
+			
+			Process -1:
+			
+				interface I{
+					public void m1();
+				}
+				class A implements I{
+					public void m1(){
+						System.out.println("m1 method called");
+					}
+				}
+				class Test{
+					public static void main(String[] args){
+						I i1 = new A();
+						i1.m1();
+					}
+				}
+				
+				
+			Process-2:
+				interface I{
+					public void m1();
+				}
+				class Test{
+					public static void main(String[] args){
+						I i1 = new I(){
+							public void m1(){
+								System.out.println("m1 method called");
+							}
+						};
+						i1.m1();
+					}
+				}
+				
+			Process-3:
+				interface I{
+					public void m1();
+				}
+				class Test{
+					public static void main(String[] args){
+						I i1 = ()->System.out.println("m1 method called");
+						i1.m1();
+					}
+				}
+				
+			Example 2:
+				
+				interface I{
+    
+					public void add(int a,int b);
+				}
+
+
+				public class MyClass {
+					public static void main(String args[]) {
+					  
+						I i1 = (a,b)->System.out.println("The sum is "+(a+b));
+						i1.add(10,20);
+					}
+				}
+				
+			Example 3:
+				interface I{
+					
+					public int getLength(String s);
+				}
+
+
+				public class MyClass {
+					public static void main(String args[]) {
+					  
+						I i1 = s->s.length();
+						
+						System.out.println("Length is "+i1.getLength("Hello"));
+					}
+				}
+			Example 4 Lambda expression to define a thread:
+				
+		
+			public class MyClass {
+				public static void main(String args[]) {
+					Runnable r = ()->{
+						for(int i=0;i<10;i++){
+							System.out.println("child thread");
+						}
+						
+					};
+				  Thread t = new Thread(r);
+				  t.start();
+				  for(int i=0;i<10;i++){
+					  System.out.println("main thread");
+				  }
+				}
+			}
+				
+			Why functional interface should contain only one abstract method;
+				The lambda expression implementation will map to the abstract method implementation by compiler. If interface contains two or more abstract
+				methods compiler will get confuse to which method to map the code.
+				
+			What is the advantage of @FunctionalInterface annotation
+				To specify explicitly to the user the given interface is Functional interface
+			
+		Comparator(I)
+			To define customized sorting order
+				public int compare(Object obj1, Object obj2)
+						|
+						|-> return -ve iff obj1 has to come before obj2
+						|
+						|-> return +ve iff obj1 has to come after obj2
+						|
+						|-> return 0 iff obj1, obj2 are equal
+			
+			
+			Comparator using Lambda expression
+			
+			import java.util.*;
+			public class MyClass {
+				public static void main(String args[]) {
+					List<Integer> l = new ArrayList<>();
+					l.add(15);
+					l.add(0);
+					l.add(5);
+					l.add(20);
+					l.add(10);
+					System.out.println("before sorting "+l);
+					Collections.sort(l);
+					System.out.println("Natural sortin order "+l);
+					Comparator<Integer> c =  ( i1,i2) ->  (i1>i2)?-1:(i1<i2)?1:0;
+					Collections.sort(l, (i1,i2) ->  (i1>i2)?-1:(i1<i2)?1:0);
+					System.out.println("after ssorting"+l);
+				}
+			}
+
+				import java.util.*;
+				public class MyClass {
+					public static void main(String args[]) {
+						TreeSet<Integer> l = new TreeSet<>((i1,i2) ->  (i1>i2)?-1:(i1<i2)?1:0);
+						l.add(15);
+						l.add(0);
+						l.add(5);
+						l.add(20);
+						l.add(10);
+						System.out.println(l);
+					}
+				}
+			
+			
+			Using Lambda expression Sorting order for custom class
+				import java.util.*;
+				class Employee implements Comparable<Employee>{
+					
+					private Integer id;
+					private String name;
+					public Employee(Integer id, String name){
+						this.id=id;
+						this.name=name;
+					}
+					public Integer getId(){
+						return id;
+					}
+					public String getName(){
+						return name;
+					}
+					public String toString(){
+						
+						return "Id: "+id+" name:"+name;
+					}
+					public int compareTo(Employee emp1){
+						
+						return -(this.id.compareTo(emp1.getId()));
+					}
+					
+					
+				}
+
+				public class MyClass {
+					public static void main(String args[]) {
+						List<Employee> empList = new ArrayList<>();
+						empList.add(new Employee(100,"suganya"));
+						empList.add(new Employee(20,"chinasamy"));
+						empList.add(new Employee(40,"jayalakshmi"));
+						empList.add(new Employee(30,"manivannan"));
+						empList.add(new Employee(200,"priya"));
+						empList.add(new Employee(700,"kranti"));
+						System.out.println(empList);
+						Collections.sort(empList);
+						System.out.println(empList);
+						Collections.sort(empList,(emp1,emp2)-> -(emp1.getName().compareTo(emp2.getName())));
+						System.out.println(empList);
+					}
+				}
+
+	
+	Anonymous inner class vs Lambda expression
+	-------------------------------------------
+		Wherever anonymous inner class there might be chance replacing with lambda expression
+		
+		Anonymous inner class: Name less inner classes consider as anonymous inner class	
+			Runnable r = new Runnable(){
+				public void run(){
+				}
+			}
+		Anonymous inner class implementing Runnable interface
+		With Runnable reference we can create Thread objects
+		
+		We can replace this method with lambda expression
+		
+		
+		Anonymous inner class
+		---------------------
+			public class MyClass {
+				public static void main(String args[]) {
+					Runnable r = new Runnable(){
+						public void run(){
+							for(int i=0;i<10;i++){
+								System.out.println("child thread");
+							}
+						}						
+					};
+				  Thread t = new Thread(r);
+				  t.start();
+				  for(int i=0;i<10;i++){
+					  System.out.println("main thread");
+				  }
+				}
+			}
+			
+			
+		Lambda Expression
+		-----------------
+			public class MyClass {
+				public static void main(String args[]) {
+					Runnable r = ()->{
+						for(int i=0;i<10;i++){
+							System.out.println("child thread");
+						}
+						
+					};
+				  Thread t = new Thread(r);
+				  t.start();
+				  for(int i=0;i<10;i++){
+					  System.out.println("main thread");
+				  }
+				}
+			}
+			Thread t = new Thread(()->{
+				for(int i=0;i<10;i++){
+					System.out.println("child thread");
+				}
+			});
+		
+		
+		class Test{
+		
+		}
+		Test t = new Test(){
+		
+		}
+		Anonymous inner class extends concrete class
+		
+		abstract class Test{
+		
+		}
+		Test t = new Test(){
+		
+		}
+		Anonymous inner class extends abstract class
+		
+		interface Test{
+			public void m1();
+			public void m3();
+			public void m2();
+		}
+		
+		Test t = new Test(){
+			public void m1(){}
+			public void m3(){}
+			public void m2(){}
+
+		}
+		Anonymous inner class implements interface contains multiple abstract methods
+		
+		Lambda expression cannot implement above all. It can replace if an anonymous inner class implements interface which contains only one abstract method(functional interface)
+		so Lambda expressions are not replaced anonymous inner classes concept
+		
+									Anonymous inner class != Lambda expression
+		
+		
+		Inside inner class we can declare instance variable but in lambda we can't declare instance variable whatever we are declaring in lambda expression
+		it will become a local variable
+		
+		this keyword always refer inner class instance variable in anonymous inner class whereas in lambda expression it always refer outer class variable
+		
+			interface interf{
+				public void m1():
+			}
+			class Test{
+				int x=888;
+				public void m2(){
+					interf i = new interf(){
+						
+						int x =999 // can declare instance variable in anonymous inner class
+						public void m1(){
+							System.out.println(this.x);// it will print current inner class instance variable i.e., 999
+							System.out.println(Test.this.x);//It will print Test class instance variable
+						}
+						
+					
+					}
+					i.m1();
+				
+				}
+			
+			}
+		
+			Lambda expression
+			
+			
+			interface interf{
+				public void m1():
+			}
+			class Test{
+				int x=888;
+				public void m2(){
+					interf i = ()->{
+							int x =999 // This variable is a declare variable
+							System.out.println(this.x);// it will refer current object instance variable i.e., 888					
+					}
+					i.m1();
+				
+				}
+			
+			}
+			
+								Anonymous inner class						|				Lambda expression
+																			|
+				------------------------------------------------------------------------------------------------------------------------------
+					It is a class without name								|	It is a function without name
+																			|
+					Anonymous inner class can extend abstract and concrete	|	Lambda expression cannot extend abstract and concrete
+					classes													|	classes
+																			|
+					Anonymous inner class can implement an interface that	|	Lambda expression can implement an interface which contains
+					contains any no.of abstract methods						|	only one abstract method(Functional interface)
+																			|
+					Inside anonymous inner class, we can declare instance	|	We can't declare instance variable whatever variables declared
+					variable												|	those are considered as local variables
+																			|
+					Anonymous inner class can be instantiated				|	Lambda expression can't be instantiated
+																			|
+					Inside anonymous inner class "this" can refer current	|	Inside lambda expression "this" always refer current outer
+					anonymous inner class object not outer class object		| 	class object i.e., enclosing class object
+																			|
+					Anonymous inner classes are best choice to handle		|	Lambda expression is best choice if we want to handle interface
+					multiple methods										|	which contains only one abstract method
+																			|
+					For the anonymous inner class, at the time of 			|	For the lambda expression at the time of compilation no
+					compilation, a separate .class files will be created	|	separate .class files will be created
+																			|
+					memory will be allocate on demand whenever, we creating	|	Lambda expression will reside in permanent memory of JVM
+					object													|	(method area)
+					
+				------------------------------------------------------------------------------------------------------------------------------
+
+			
+			Using lambda expression we can access global variables, local variables directly.
+			Local variables which are referenced from lambda expression are final implicitly(either declared or not declared)
+			Here y is a final variable implicitly. If we change value of y we will get compile time error saying
+			 "local variables referenced from a lambda expression must be final or effectively final"
+			
+				interface interf{
+					public void m1();
+				}
+
+				public class MyClass {
+					
+					int x=10;
+					public void m2(){
+						int y=20;
+						interf i = ()->{
+						  System.out.println("class variable "+x); //10
+						  System.out.println("method variable "+y);//20
+						};
+						i.m1();
+						
+						
+					}
+					
+					public static void main(String args[]) {
+						MyClass mc = new MyClass();
+						mc.m2();
+					}
+				} 
+
+	Advantages of Lambda expression
+	-------------------------------
+		we can enable functional programming in java
+		we can reduce the length of the code so that readability will be improved
+		we can reduce complexity of anonymous inner classes until some content
+		we can handle procedures/functions just like values
+		we can handle procedures/functions just like arguments
+		Easier to use updated API's and libraries
+		Enable support for parallel processing
+
+		
+Default methods and static methods in interfaces
+-------------------------------------------------
+
+	From 1.8 we can write concrete methods in interface
+		interface interf{
+			default void m2(){
+				System.out.println("m1 in interface default method");
+			}
+		}
+		"default" is a keyword to write concrete methods
+	
+	implemented class can use this concrete method or can override in implemented class
+	
+		public MyClass implements interf{
+		
+			public static void main(String args[]) {
+						interf mc = new MyClass();
+						mc.m2();
+					}
+		}
+		
+						(or)
+						
+		public MyClass implements interf{
+			public void m2(){
+				System.out.println("m1 in MyClass method");
+			}	
+				
+			public static void main(String args[]) {
+						interf mc = new MyClass();
+						mc.m2();
+					}
+		}
+	
+			
+	Default methods w.r.t to multiple inheritance
+	---------------------------------------------
+		If two interfaces having same default signature method there is a chance to raise ambiguity problem in implemented class
+		
+		To overcome ambiguity problem we have to override default method in implemented class and can write own customized logic
+			interface left{
+			
+				default void m1(){
+					System.out.println("Left interface m1 method");
+				}
+			}
+			interface Right{
+				default void m1(){
+					System.out.println("right interface m1 method");
+				}
+			}
+			
+			public MyClass implements Left, Right{
+				
+				public void m1(){
+					System.out.println("Myclass M1 method");
+				}
+				public static void main(String args[]) {
+				
+				
+				}
+			}
+		If we want to have any default interface method logic we can call by using interface Name.super.method signature
+		
+			public MyClass implements Left, Right{
+				
+				public void m1(){
+					System.out.println("Myclass M1 method");
+					Left.super.m1();
+				}
+				public static void main(String args[]) {
+				
+				
+				}
+			}
+		
+		
+							Interface with default method					|				Abstract class
+																			|
+			---------------------------------------------------------------------------------------------------------------------------------
+				Inside interface every variable is always public static 	|	Inside abstract class we can declare instance variable 
+				final and we can't declare instance variable				|	which are required to the child objects
+																			|
+				Interface never talks about state of objects				|	Abstract class can talk about state of objects
+																			|
+				We can't declare constructor inside interface				|	We can declare constructor
+																			|
+				We can't declare instance and static blocks					|	We can declare instance and static blocks
+																			|
+				Functional interface with default methods can refer Lambda	|	Abstract classes can't refer Lambda expressions
+				expression													|
+																			|
+				Inside interface we can't override object class methods		|	Inside abstract class we can overrride object class methods
+																			|
+			-----------------------------------------------------------------------------------------------------------------------------------
+			
+								interface with default methods != Abstract classes
+	
+	static methods inside interface
+	-------------------------------
+		We can declare static methods inside interface. The purpose is define utility methods. 
+		
+			interface interf{
+				public static void m1(){
+					System.out.println("static interface m1 method called");
+				}
+			
+			}
+		These methods can call directly with Interface Name.method. There is no matter implemented class or normal class. We can directly call these methods
+		
+			class Test{
+				public static void main(String[] args){
+					interf.m1();
+				}
+			
+			}
+		We can't call by using implemented class object.method name( Test t = newe Test(); t.m1());
+						by using implemented class name. method name;( Test.m1())
+						
+		
+		
+		interface static methods w.r.t over riding
+		-------------------------------------------
+			overriding concept is not applicable for interface static methods
+			
+			interface interf{								interface interf{							interface interf{								
+				public static void m1(){						public static void m1(){}					public static void m1(){}
+				}											}											}
+			
+			}
+			
+			class Test implements interf{					class Test implements interf{				class Test implements interf{	
+				public static void m1(){						public static void m1(){}					private static void m1(){}
+				
+				}											}											}
+			}
+			
+					valid											valid										valid
+				
+		
+			From 1.8 onwards we can write main method in interface also
+			
+				interface interf{
+					public static void main(String[] args){
+						System.out.println("interface main method called");
+					}
+				
+				} 
+					javac interf.java
+					java interf
+					
+
+
+Predefined functional interfaces
+--------------------------------
+	
+	Predicate(I):
+	-------------
+		Introduced in 1.8
+		presents in java.util.function package
+		Predicate functional interface to check a particular condition and return boolean value(true/false)
+		
+		It contains only one abstract method 
+			
+			interface predicate<T>{
+				boolean test(t t);
+			}
+		test method will check some condition and will return boolean value based on condition
+		
+		Example to check given number is greater than 10
+		
+			public MyPredicate implements Predicate<Integer>{
+				public boolean test(Integer i){
+					return i>10 ? true : false;
+				}
+				
+			}
+			
+		In Lambda expression
+			(Integer i)-> i>10 ? true : false;
+		
+		More simplified code
+			i->i>10;
+		
+		java.util.function.Predicate<Integer> p = i-> i>10;
+		System.out.println(p.test(100)); //true
+		System.out.println(p.test(5)); //false
+		
+		Check given integer is greater than 5 using predicate
+		
+			import java.util.function.Predicate;
+			public class MyClass {
+				public static void main(String args[]) {
+					Predicate<Integer> p = i->i>10;
+					System.out.println(p.test(100));
+					System.out.println(p.test(5));
+				}
+			}
+		
+		Check given string length is more than 5 using predicate	
+			
+			import java.util.function.Predicate;
+			public class MyClass {
+				public static void main(String args[]) {
+					Predicate<String> p = s->s.length()>5;
+					System.out.println(p.test("abcdef")); //true
+					System.out.println(p.test("test")); //false
+				}
+			}
+		
+		Predicate joining
+		------------------
+			we can combined multiple predicates into single predicate 
+			
+			P1: check given number is greater than 10
+			P2: check given number is even
+			
+			we can combined these two predicates by using below syntax
+				P1.and(P2) // It will return true if P1 and P2 is true
+				P1.or(P2) // It will return ture if any one of predicate is true
+				P1.negate() // It will return true if given number is not greater than 10(means negate the P1 condition)
+				
+			These are default methods in Predicate interface
+				
+				import java.util.function.Predicate;
+
+				public class MyClass {
+					public static void main(String args[]) {
+						
+						int[] x={0,5,10,15,20,25,30};
+						Predicate<Integer> p1 = i->i>10;
+						Predicate<Integer> p2 = i->i%2==0;
+						
+						System.out.println("The numbers greater than 10 are");
+						m1(x,p1);
+						
+						System.out.println("The Even numbers are");
+						m1(x,p2);
+						
+						System.out.println("The numbers Not greater than 10 are");
+						m1(x,p1.negate());
+						
+						System.out.println("The numbers greater than 10 and even numbers are");
+						m1(x,p1.and(p2));
+						
+						System.out.println("The numbers greater than 10 or even numbers are");
+						m1(x,p1.or(p2));
+						
+					}
+					public static void m1(int[] x ,Predicate<Integer> p){
+						for(int x1:x){
+							System.out.println(x1+"-- "+p.test(x1));
+						}
+						
+					}
+				}
+				
+				Example to remove null and empty string using predicate functional interface
+					
+					import java.util.function.Predicate;
+					import java.util.List;
+					import java.util.ArrayList;
+
+					public class MyClass {
+						public static void main(String args[]) {
+							String[] names = {"Durga"," ",null," Ravi","","Shiva",null};
+							Predicate<String> checkEmptyStr = (s) -> s!=null && s.trim().length()!=0;
+							List<String> al = new ArrayList<>();
+							for(String name: names){
+								if(checkEmptyStr.test(name)){
+									al.add(name);
+								}
+							}
+							System.out.println(al);
+						}
+					}
+
+Function interface
+------------------
+	Same like predicate but only one difference is it can return any type value 
+		Eg:int, long, String, Employee Object.
+	We can use function interface to perform some operation and return some value
+	
+		interface Function<T,R>{
+		
+			public R apply(T input);
+			
+		}
+		
+		// find length of string and return its length;
+
+			import java.util.function.Function;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					Function<String,Integer> f= s-> s.length();
+					String s="kranti";
+					System.out.println(f.apply(s)); //6
+				}
+			}
+			
+		
+		// return square of given integer
+
+			import java.util.function.Function;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					Function<Integer,Integer> f= i-> i*i;
+					System.out.println(f.apply(5)); //25
+				}
+			}
+		
+			
+									Predicate							|					Function
+																		|
+		----------------------------------------------------------------------------------------------------------------------------------
+			To implement conditional checks, we should go for 			|	To perform certain operation and to return some result we
+				predicate												|	should go for function
+																		|
+			Predicate can take one type parameter which represents		|	Function can take 2 type parameters. First one represent 
+			input  argument type										|	input argument type and second one represent return type
+				Predicate<T>											|		Function<T,R>
+																		|
+			Predicate interface defines one abstract method called		|	Function interface defines one abstract method called
+				test()													|		apply()
+																		|
+			public boolean test(T t)									|	public R apply(T t)
+																		|
+			Predicate can return only boolean value						|	Function can return any type of value
+																		|
+		-----------------------------------------------------------------------------------------------------------------------------------
+		
+		// remove spaes in the string
+
+			import java.util.function.Function;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					Function<String,String> f= s->s.replaceAll(" ","");
+					System.out.println(f.apply("Durga software solutions "));
+				}
+			}
+			
+		// count no.of spaces in the string
+
+			import java.util.function.Function;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					Function<String,Integer> f= s-> s.length()-s.replaceAll(" ","").length();
+					System.out.println(f.apply("Durga software solutions "));
+				}
+			}
+			
+		    
+		 // find grade of the student
+
+
+			import java.util.function.Function;
+			import java.util.ArrayList;
+
+			class Student{
+				
+			   public String name;
+			   public int marks;
+			   public Student(String name, int marks){
+				   this.name=name;
+				   this.marks=marks;
+			   }
+				
+			}
+
+
+			public class MyClass {
+				public static void main(String args[]) {
+					ArrayList<Student> al = new ArrayList<>();
+					al.add(new Student("suganya",100));
+					al.add(new Student("kranti",50));
+					al.add(new Student("rajesh",80));
+					al.add(new Student("sunny",40));
+					al.add(new Student("bunny",20));
+					populate(al);
+				}
+				
+				public static void populate(ArrayList<Student> l){
+					
+					
+					Function<Student, String> f = s->{
+						if(s.marks>=80){
+							return "A[Distinction]";
+						}
+						if(s.marks>=60){
+							return "B[First class]";
+						}
+						if(s.marks>=40){
+							return "C[second class]";
+						}
+						if(s.marks>=35){
+							return "D[Third class]";
+						}
+						return "E[Failed]";
+					};
+					
+					for(Student s:l){
+						System.out.println(s.name+" "+f.apply(s));
+					}
+					
+				}
+				
+			}
+			
+		Function chaining
+		-----------------
+			Default methods to join functions
+			
+					Function f= f1.andThen(f2)=> f1 will be apply then f2
+					Function f= f1.compose(f2)=> f2 will be apply then f1
+		
+		static methods
+		--------------
+			identity():to return a function which provides return same input
+				Function<String,String> f=Function.identity();
+				f.apply("lion"); //lion
+		
+	
+	Consumer
+	--------
+		Consumer can accepts values but it will not return any values
+		
+			interface Consumer<T>{
+				void accept(T t);
+			}
+		]	
+			
+		//print given string using consumer
+
+			import java.util.function.Consumer;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					Consumer<String> c= s->System.out.println(s);
+					c.accept("kranti");
+					c.accept("Hello");
+				}
+			}
+		
+		
+		// Print Movie information
+
+			import java.util.function.Consumer;
+			import java.util.ArrayList;
+
+			class Movie{
+				
+			   public String movieName;
+			   public String hero;
+			   public String heroine;
+			   public Movie(String movieName, String hero, String heroine){
+				   this.movieName=movieName;
+				   this.hero=hero;
+				   this.heroine=heroine;
+			   }
+				
+			}
+
+
+			public class MyClass {
+				public static void main(String args[]) {
+					ArrayList<Movie> al = new ArrayList<>();
+					al.add(new Movie("Bahubali","Prabhas","Anushka"));
+					al.add(new Movie("Rangasthalam","Ramcharan","samantha"));
+					al.add(new Movie("2.0","Rajanikanth","Amy Jackson"));
+					populate(al);
+				}
+				
+				public static void populate(ArrayList<Movie> l){
+					
+					Consumer<Movie> c = m->System.out.println(m.movieName+" "+m.hero+" "+m.heroine);
+					for(Movie m:l){
+						c.accept(m)
+					}
+					
+				}
+				
+			}
+			
+
+		// display students information and grade which marks are greater than 60 using Function, Consumer, Predicate
+
+
+			import java.util.function.Function;
+			import java.util.function.Consumer;
+			import java.util.function.Predicate;
+			import java.util.ArrayList;
+
+			class Student{
+				
+			   public String name;
+			   public int marks;
+			   public Student(String name, int marks){
+				   this.name=name;
+				   this.marks=marks;
+			   }
+				
+			}
+
+
+			public class MyClass {
+				
+				public static void main(String args[]) {
+					ArrayList<Student> al = new ArrayList<>();
+					populate(al);
+					displayInfo(al);
+				}
+				
+				public static void  populate(ArrayList<Student> al){
+					al.add(new Student("suganya",100));
+					al.add(new Student("kranti",50));
+					al.add(new Student("rajesh",80));
+					al.add(new Student("sunny",40));
+					al.add(new Student("bunny",20));   
+				}
+				
+				
+				public static void displayInfo(ArrayList<Student> l){
+					
+					Predicate<Student> p = s->s.marks>=60;
+					
+					Function<Student, String> f = s->{
+						if(s.marks>=80){
+							return "A[Distinction]";
+						}
+						if(s.marks>=60){
+							return "B[First class]";
+						}
+						if(s.marks>=40){
+							return "C[second class]";
+						}
+						if(s.marks>=35){
+							return "D[Third class]";
+						}
+						return "E[Failed]";
+					};
+					
+					Consumer<Student> c=s->{
+						System.out.println("Student name "+s.name);
+						System.out.println("Student marks "+s.marks);
+						System.out.println("Student grade "+f.apply(s));
+						
+						
+					};
+					
+					for(Student s:l){
+						if(p.test(s)){
+							c.accept(s);    
+						}
+						
+					}
+					
+				}
+				
+			}
+	
+		Consumer chaining
+		-----------------
+			Combining multiple consumer chains group together
+				default Consumer c = c1.andThen(c2);
+				c.accept();
+				
+	Supplier
+	--------
+		supplier wont take input and will return some output
+			Eg: current date
+			
+			interface Supplier<R>{
+				R get();
+			}
+		
+		
+			//write a supplier system date
+
+				import java.util.function.Supplier;
+				import java.util.Date;
+
+				public class MyClass {
+					public static void main(String args[]) {
+						Supplier<Date> s = ()-> new Date();
+						System.out.println(s.get());
+						
+					}
+				}
+				
+			
+			
+			//write a supplier to send random name
+
+				import java.util.function.Supplier;
+
+				public class MyClass {
+					public static void main(String args[]) {
+						Supplier<String> s=()->{
+						  String[] s1={"sunny","bunny","chinny","pinny"};
+						  int num = (int)(Math.random()*4);
+						  return s1[num];
+						};
+						System.out.println(s.get());
+					}
+				}
+				
+			Math.random number will generate number between 0 and 0.999 randomly
+			
+			/*write a supplier to generate random password
+				length should be 8 charactrs
+				2,4,6,8 should be numbers
+				1,3,5,7 uppercase alphabets and symbols 
+				#,@,$
+
+			*/
+				import java.util.function.Supplier;
+
+				public class MyClass {
+					public static void main(String args[]) {
+						
+						Supplier<String> s=()->{
+							Supplier<Integer> d= ()->(int)(Math.random()*10);
+							String symbols="ABCDEFGHIJKLMNOPQRSTUVWXYZ#$@";
+							
+							int symbLength = symbols.length();
+							Supplier<Character>c =()->symbols.charAt((int)(Math.random()*symbLength));
+							
+							String pwd = "";
+							for(int i=1;i<8;i++){
+								if(i%2==0){
+									pwd+=d.get();
+								}
+								else{
+									pwd+=c.get();
+								}
+							}
+							return pwd;
+						
+						};
+						
+						System.out.println(s.get());
+					}
+				}	
+				
+
+		Property		|			Predicate			|			Function			|			Consumer			|			Supplier			|
+						|								|								|								|								|
+	-------------------------------------------------------------------------------------------------------------------------------------------------------
+		purpose			|	To take some input and		|	To take some inputs and 	|	To take some inputs and	 	|	To supply some value based 	|	
+						|	perform some conditional	|	perform required operation	|	perform some operation and	|	our requirement				|
+						|	checks						|	and return the result		|	it won't return result		|								|
+						|								|								|								|								|
+		interface		|	interface Predicate<T>{		|	interface Function<T,R>		|	interface Consumer<T>{		|	interface Supplier<R>{		|
+		declaration		|		.....					|		.......					|		....					|		........				|
+						|	}							|	}							|	}							|	}							|
+						|								|								|								|								|
+		Single abstract	|	boolean test(T t);			|	R apply(T t);				|	void accept(T t);			|	R get();					|
+		method			|								|								|								|								|
+						|								|								|								|								|
+		default methods	|	and(), or(), negate()		|	andThen(),compose()			|	andThen()					|		------					|
+						|								|								|								|								|
+		static methods	|	isEqual()					|	identity()					|		-----					|		-----					|
+						|								|								|								|								|
+	-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	
+Two argument(Bi) Functional interfaces
+--------------------------------------
+	
+	Predicate, Function, Consumer functional interfaces will accept only one input parameter. If user wants to send two parameters we will go for
+		BiPredicate, BiFunction, BiConsumer interfaces
+		
+	BiPredicate Functional interface
+	---------------------------------
+		BiPredicate can take two input parameters whereas Predicate will take only one input parameter
+		All default methods of Predicate same will be available to BiPredicate
+				
+				interface BiPredicate<T,U>{
+					public boolean test(T t, U u);
+				}
+			
+		// sum of two number is even or not using BiPredicate
+
+			import java.util.function.BiPredicate;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					BiPredicate<Integer,Integer> p = (i1,i2) -> (i1+i2)%2==0 ;
+					System.out.println(p.test(5,7));
+					System.out.println(p.test(6,7));
+					System.out.println(p.test(10,20));
+				}
+			}
+		
+	
+	BiFunctional Functional interface
+	---------------------------------	
+		BiFunction can take two input parameters whereas Function will take only one input parameter
+			default method is andThen() only
+			
+				interface BiFunction<T,U,R>{
+					R apply(T t, U u);
+				}
+				
+		// product of two number  using BiFunction
+
+			import java.util.function.BiFunction;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					BiFunction<Integer,Integer,Integer> b = (i1,i2) -> i1*i2;
+					System.out.println(b.apply(5,7));
+					System.out.println(b.apply(6,7));
+					System.out.println(b.apply(10,20));
+				}
+			}
+			
+	BiConsumer Functional interface
+	---------------------------------
+		BiConsumer can take only one input argument whereas Consumer will take only one input parameter
+		It has same default methods of Consumer
+			
+				interface BiConsumer<T,U>{
+					void accept(T t, U u);
+					default BiConsumer andThen(BiConsumer bc);
+				}
+		
+		// print a string by combining two input strings
+
+			import java.util.function.BiConsumer;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					BiConsumer<String,String> c = (i1,i2) ->System.out.println(i1+i2);
+					c.accept("kranti","suganya");
+				}
+			}
+
+				
+				
+								One argument functional interface				|				Two argument(Bi) functional interfaces		
+																				|
+				------------------------------------------------------------------------------------------------------------------------------------
+						interface Predicate<T>{									|				interface BiPredicate<T,U>{		
+							public boolean test(T t);							|					public boolean test(T t,U u);			
+							default Predicate and(Predicate p);					|					default BiPredicate and(BiPredicate p);
+							default Predicate or(Predicate p);					|					default BiPredicate or(BiPredicate p);
+							default Predicate negate();							|					default BiPredicate negate();
+							static Predicate isEqual(Object o);					|
+						}														|				}		
+																				|	
+						interface Function<T,R>{								|				interface BiFunction<T,U,R>{
+							public	R apply(T t);								|					public R apply(T t, U u);		
+							default Function andThen(Function f);				|					default BiFunction andThen(BiFunction f);
+							default Function compose(Function f);				|				}
+							static Function identity();							|
+						}														|
+																				|				
+						interface Consumer<T>{									|				interface BiConsumer<T,U>{
+							public void accept(T t);							|					public void accept(T t, U u);
+							default Consumer andThen(Consumer c)				|					default BiConsumer andThen(BiConsumer c);
+						}														|				}
+																				|
+				---------------------------------------------------------------------------------------------------------------------------------------
+				
+				
+
+Primitive Type functional interfaces
+-------------------------------------
+	
+	Using normal functional interfaces for primitive types will reduce the performance because functional interfaces types are objects. If user sends primitive
+	types compiler will automatically converts into wrapper objects using auto boxing. If any arithmetic operations are performed on these compiler will 
+	convert into primitive(Auto unboxing) types and will perform operations on this. Due to this primitive type functional interfaces are highly recommended to 
+	use.
+																				
+	Predicate primitive type functional interface
+	----------------------------------------------
+		interface IntPredicate{
+			 boolean test(int t);
+		}
+
+		interface LongPredicate{
+			boolean test(long l);
+		}
+		
+		interface DoublePredicate{
+			boolean test(double d);
+		}
+		
+		Remaining methods all are same in Predicate function
+																				
+		// Print even number in a given array using IntPredicate
+
+			import java.util.function.IntPredicate;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					int[] x = {5,10,15,20,25,30};
+					IntPredicate p =i->i%2==0;
+					for(int a:x){
+						if(p.test(a)){
+							System.out.println(a+" is even");
+						}
+					}
+				}
+			}
+		Using above one performance will be good
+	
+	Function primitive type functional interface
+	--------------------------------------------
+		interface IntFunction<R>{ It will take input as int type and will return given type
+			public R apply(int i);
+		}
+		
+		interface ToIntFunction<T>{// It will return int type value and will take given input type 
+			public int applyAsInt(T t);
+		}
+		
+		
+		// return square of function using IntFunction
+
+			import java.util.function.IntFunction;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					int[] x = {5,10,15,20,25,30};
+					IntFunction<Integer> p = i->i*i;
+					for(int a:x){
+						System.out.println(p.apply(a));
+					}
+				}
+			}
+			
+		// return Length of the String
+
+			import java.util.function.ToIntFunction;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					ToIntFunction<String> i = s->s.length();
+					System.out.println(i.applyAsInt("kranti"));
+				}
+			}
+												
+	// return square root of given number
+
+		import java.util.function.IntToDoubleFunction;
+
+		public class MyClass {
+			public static void main(String args[]) {
+				IntToDoubleFunction idf = i->Math.sqrt(i);
+				System.out.println(idf.applyAsDouble(5));
+			}
+		}	
+		
+		Different Versions of primitive type functional interfaces
+		----------------------------------------------------------
+
+			IntFunction<R>
+				public R apply(int i);
+			
+			LongFunction<R>
+				public R apply(long l);
+				
+			DoubleFunction<R>
+				public R apply(double d);
+						
+
+			ToIntFunction<T>
+				public int applyAsInt(T t);
+				
+			ToLongFunction<T>
+				public long applyAsLong(T t);
+			
+			ToDoubleFunction<T>
+				public double applyAsDouble(T t);
+				
+			
+			IntToLongFunction
+				public long applyAsLong(int i);
+				
+			IntToDoubleFunction
+				public double applyAsDouble(int i);
+				
+			
+			LongToIntFunction
+				public int applyAsInt(long l);
+				
+			LongToDoubleFunction
+				public double applyAsDouble(long l);
+				
+			
+			DoubleToIntFunction
+				public int applyAsInt(double d);
+			
+			DoubleToLongFunction
+				public long applyAsLong(double d);
+				
+			
+			ToIntBiFunction<T,U>
+				public int applyAsInt(T t, U u);
+			
+			ToLongBiFunction<T,U>
+				public long applyAsLong(T t, U u);
+			
+			ToDoubleBiFunction<T,U>
+				public double applyAsDouble(T t, U u);
+				
+	
+	Consumer primitive type functional interface
+	-------------------------------------------
+		
+		interface IntConsumer{
+			public void accept(int i);
+		}
+		
+		interface LongConsumer{
+			public void accept(float i);
+		}
+		
+		interface DoubleConsumer{
+			public void accept(double i);
+		}
+		
+		interface ObjIntConsumer<T>{
+			public void accept(T t, int i);
+		}
+		
+		interface ObjLongConsumer<T>{
+			public void accept(T t, long l);
+		}
+		
+		interface ObjDoubleConsumer<T>{
+			public void accept(T t,double d);
+		}
+		
+		
+		// print square of the given number
+
+			import java.util.function.IntConsumer;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					IntConsumer ic = i->System.out.println(i*i);;
+					ic.accept(5);
+				}
+			}
+		
+	Supplier primitive type functional interface
+	-------------------------------------------
+		interface IntSupplier{
+			public int getAsInt();
+		}
+		
+		interface LongSupplier{
+			public long getAsLong();
+		}
+		
+		interface DoubleSupplier{
+			public double getAsDouble();
+		}
+		
+		interface BooleanSupplier{
+			public boolean getAsBoolean();
+		}
+		
+	
+		// generate Random number
+
+			import java.util.function.IntSupplier;
+
+			public class MyClass {
+				public static void main(String args[]) {
+					IntSupplier i=()->(int)(Math.random());
+					System.out.println(i.getAsInt());
+				}
+			}	
+		
+		
+	Unary operator and its primitive versions
+	------------------------------------------
+		If input and output type is same type then we go for UnaryOperator. It is the child interface of Function interface
+		
+			interface UnaryOperator<T>{
+				public T apply(T t);
+			}
+			interface IntUnaryOperator{
+				public int applyAsInt();
+			}
+			interface LongUnaryOperator{
+				public long applyAsLong();
+			}
+			interface DoubleUnaryOperator{
+				public double applyAsDouble();
+			}
+			
+				
+			// return square of given number
+
+				import java.util.function.UnaryOperator;
+
+				public class MyClass {
+					public static void main(String args[]) {
+						UnaryOperator<Integer> u = (i)-> i*i;
+						System.out.println(u.apply(5));
+					}
+				}
+	
+	
+	BinaryOperator and its primitive versions
+	------------------------------------------
+		If two input and output type is same type then we go for BinaryOperator. it if child interface of BiFunction interface.
+			
+			interface BinaryOperator<T>{
+				public T apply(T t, T u);
+			}
+			
+			interface IntBinaryOperator{
+				public int applyAsInt(int i,int i);
+			}
+			
+			interface LongBinaryOperator{
+				public long applyAsLong(long l1, long l2);
+			}
+			
+			interface DoubleBinaryOperator{
+				public double applyAsDouble(double d1, double d2);
+			}
+		
+
+		
+Method reference & Constructor reference by Double colon(::) operator
+---------------------------------------------------------------------
+	Double colon(::) operator can be used for method reference or constructor reference
+	In the functional interface can refer method reference or constructor reference. so it is alternative to Lambda expression
+	
+	In Method reference 
+	
+		syntax for static method reference	
+			class name :: method name
+				Test::m1
+		
+		syntax for non static method reference	
+			object ref :: method name
+				Test t=new Test();
+				t::m1;
+	 The main advantage of method reference is code re-usability
+		Argument types should be same target method and reference method
+	syntax for constructor reference
+		className::new
+		Sample:: new
+	
+	
+		
+	//using static method reference
+		interface Interf{	
+			void m1();
+		}
+		public class MyClass {
+			public static void m2(){
+				System.out.println("static m2 method called");
+			}
+			
+			public static void main(String args[]) {
+				Interf i1=MyClass::m2;
+				i1.m1();
+			}
+		}
+	
+	// implementing Thread using method reference
+		public class MyClass {
+			
+			public void m1(){
+				for(int i=1;i<10;i++){
+					System.out.println("child thread");
+				}
+			}
+			
+			public static void main(String args[]) {
+				MyClass c = new MyClass();
+				Runnable r = c::m1;
+				Thread t = new Thread(r);
+				t.start();
+				for(int i=1;i<10;i++){
+					System.out.println("main thread");
+				}
+				
+			}
+		}
+	
+	// implementing constructor reference
+
+		class Sample{
+			
+			public Sample(){
+				System.out.println("sample class no-arg constructor ");
+			}
+		}
+		interface Interf{
+			
+			Sample get();
+		}
+		public class MyClass {
+			
+			public static void main(String args[]) {
+				Interf i = Sample::new;
+				i.get();
+			}
+		}
+
+		
+Stream api
+-----------
+	It is related to Collections. If you want to process the collection object then we go for Stream concept. 
+	It is introduced in 1.8 and present in java.util.stream package
+	There is no relation between I/O streams and collection streams
+		
+	stream() is a default method present in Collection interface. It will return java.util.stream.Stream object
+			Stream s = c.stream();
+	we can process using this stream objects. The process contains two steps
+		1. Configuration
+		2. Processing
+				count()
+				sort()	
+				collect()
+				min()
+				max()
+				forEach()
+				toArray()
+		
+		Configuration can do in two ways. 
+			Filter --> filter the elements based on some boolean condition
+			Map	   --> To generate new object based on some mechanism
+			
+			Filtering
+			---------
+				If we want to filter elements from the collection based on some boolean condition then we should go for filtering
+				
+				We can configure filter by using filter() of Stream interface
+					public Stream filter(Predicate<T> t); //it can be boolean value of lambda expression
+					
+					Stream s = c.stream().filter(i->i%2==0);
+					
+					// create new arraylist having length greater than 9 in arraylist
+
+						import java.util.stream.Stream;
+						import java.util.stream.Collectors;
+						import java.util.ArrayList;
+						import java.util.List;
+
+						public class MyClass {
+							
+							public static void main(String args[]) {
+								List<String> l = new ArrayList<>();
+								l.add("pavan");
+								l.add("ravi teja");
+								l.add("chiranjeevi");
+								l.add("venkatesh");
+								l.add("nagarjuna");
+								System.out.println(l);
+								List<String> al = l.stream().filter(s->s.length()>=9).collect(Collectors.toList());
+								System.out.println(al);
+							}
+						}
+		
+	
+			
+			Mapping
+			-------
+				If we want to create a separate new object for every object present in collection based on some mechanism then we should go for mapping
+				
+				we can implement mapping by using map() of Stream interface
+					public Stream map(Function<T,R> f);
+					
+					Stream s = c.stream().map(i->i*2);
+					
+					// create new arraylist with double of given element in array list using streams 
+
+						import java.util.stream.Stream;
+						import java.util.stream.Collectors;
+						import java.util.ArrayList;
+						import java.util.List;
+
+						public class MyClass {
+							
+							public static void main(String args[]) {
+								List<Integer> l = new ArrayList<>();
+								l.add(0);
+								l.add(10);
+								l.add(20);
+								l.add(5);
+								l.add(15);
+								l.add(25);
+								System.out.println(l);
+								List<Integer> al = l.stream().map(i ->i*2).collect(Collectors.toList());
+								System.out.println(al);
+							}
+						}
+
+					
+		Processing by collect() method
+			This method collects the element from Stream and adding into the specified Collection
+			
+		
+			
+			/* create new arraylist having length greater than 9 in arraylist
+				create new arraylist with uppercase in arraylist
+			*/
+				import java.util.stream.Stream;
+				import java.util.stream.Collectors;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class MyClass {
+					
+					public static void main(String args[]) {
+						List<String> l = new ArrayList<>();
+						l.add("pavan");
+						l.add("ravi teja");
+						l.add("chiranjeevi");
+						l.add("venkatesh");
+						l.add("nagarjuna");
+						System.out.println(l);
+						List<String> al = l.stream().filter(s->s.length()>=9).collect(Collectors.toList());
+						System.out.println(al);
+						
+						List<String> l1=l.stream().map(s-> s!=null ?s.toUpperCase() : null).collect(Collectors.toList());
+						System.out.println("uppercase letters ");
+						System.out.println(l1);
+						
+					}
+				}			
+					
+		Processing by count() method	
+			This method will return no.of elements in the stream
+			public long count()
+				/* count no.of elements if each element length greater than 9
+				*/
+					import java.util.stream.Stream;
+					import java.util.stream.Collectors;
+					import java.util.ArrayList;
+					import java.util.List;
+
+					public class MyClass {
+						
+						public static void main(String args[]) {
+							List<String> l = new ArrayList<>();
+							l.add("pavan");
+							l.add("ravi teja");
+							l.add("chiranjeevi");
+							l.add("venkatesh");
+							l.add("nagarjuna");
+							System.out.println(l);
+							long count = l.stream().filter(s->s.length()>=9).count();
+							System.out.println("no.of elements which are greater than or equal to 9 is "+count);
+						}
+					}
+		
+		Processing by sorted() method
+			we can use sorted() method to sort elements inside stream
+			we can sort either based on default natural sorting order or own customized sorting order specified by Comparator object
+			
+				sorted() // default natural sorting order
+				sorted(Comparator c) // customized sorting order
+				
+			/* sort elements using natural sorting order and decending order in streams
+				*/
+				import java.util.stream.Stream;
+				import java.util.stream.Collectors;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class MyClass {
+					
+					public static void main(String args[]) {
+						List<Integer> l = new ArrayList<>();
+						l.add(0);
+						l.add(10);
+						l.add(20);
+						l.add(5);
+						l.add(15);
+						l.add(25);
+						System.out.println(l);
+						List<Integer> l1 = l.stream().sorted().collect(Collectors.toList());
+						System.out.println("default natural sorting order");
+						System.out.println(l1);
+						List<Integer> l2= l.stream().sorted((i1,i2)-> -(i1.compareTo(i2))).collect(Collectors.toList());
+						System.out.println("descending sorting order");
+						System.out.println(l2);
+						 
+					}
+				}
+		
+		Processing by min() and max()
+			To perform min and max operations it should be sorted according to some Comparator
+			
+				public min(Comparator c) Return minimum value according to specified Comparator
+				
+				public max(Comparator c) Return maximum value according to specified Comparator
+				
+				/* Processing by min and max methods
+					*/
+					import java.util.stream.Stream;
+					import java.util.stream.Collectors;
+					import java.util.ArrayList;
+					import java.util.List;
+
+					public class MyClass {
+						
+						public static void main(String args[]) {
+							List<Integer> l = new ArrayList<>();
+							l.add(0);
+							l.add(10);
+							l.add(20);
+							l.add(5);
+							l.add(15);
+							l.add(25);
+							System.out.println(l);
+							int minvalue = l.stream().min((i1,i2)-> i1.compareTo(i2)).get();
+							System.out.println("minimum value in collection "+minvalue);
+							int maxValue = l.stream().max((i1,i2)->i1.compareTo(i2)).get();
+							System.out.println("maximum value in collection "+maxValue);
+						}
+					}
+
+		Processing by forEach()
+		-----------------------
+			This method won't return any value
+			This method can take lambda expression as argument and apply that lambda expression for each element present in Stream
+			
+				/* Print each element in Collection using Stream forEach 
+				*/
+				import java.util.stream.Stream;
+				import java.util.stream.Collectors;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class MyClass {
+					
+					public static void main(String args[]) {
+						List<Integer> l = new ArrayList<>();
+						l.add(0);
+						l.add(10);
+						l.add(20);
+						l.add(5);
+						l.add(15);
+						l.add(25);
+						l.forEach(i->System.out.println(i));
+					}
+				}
+
+		Processing by toArray()
+		-----------------------
+			we can use toArray() method to copy elements present inside in the stream into array
+			
+				/* copy elements into array
+					*/
+					import java.util.stream.Stream;
+					import java.util.stream.Collectors;
+					import java.util.ArrayList;
+					import java.util.List;
+
+					public class MyClass {
+						
+						public static void main(String args[]) {
+							List<Integer> l = new ArrayList<>();
+							l.add(0);
+							l.add(10);
+							l.add(20);
+							l.add(5);
+							l.add(15);
+							l.add(25);
+							Integer[] larray = l.stream().toArray(Integer[]::new);
+							for(Integer i:larray){
+								System.out.println(i);
+							}
+						}
+					}
+		Stream.of()
+		-----------
+			We can apply Stream for group of values & for arrays
+			For group of values 
+			--------------------
+				Stream<Integer> s= Stream.of(9,99,999,999);
+					s.forEach( System.out::println);
+			
+	
+	Summary
+	---------
+			purpose --> process the group of objects
+			stream() --> default method in Collections interface, produce Stream object
+							Stream s = c.stream();
+							
+							configuration
+							
+			filter() --> filter the elements based on some boolean condition
+			map()	 --> regenerate each element by applying some mechanism
+							
+							process
+			
+			collect() --> collect the elements in stream
+			count()	  --> return no.of elements in stream
+			sorted()  --> sort the elements in stream by natural sorting order
+			sorted(Comparator c) --> sort the elements by given comparator
+			min(Comparator c)	-->	find the minimum element by using given Comparator
+			max(Comparator c)	-->	find the maximum element by using given Comparator
+			forEach() --> It will apply some logic for each object in stream or collection
+			Stream.of() --> returns the Stream object for given elements
+			toArray() --> converts Stream elements into array
+			
+
+Date & Time api(joda Time api)
+------------------------------
+	Until 1.7 whatever classes and interfaces are there to represent date and time, those are not upto the mark of convenience and performance.
+	So in 1.8 new Date & Time api introduced. This api was developed by joda.org so this enhancement is also called as joda time api
+	These api's are highly recommended to use for date representation
+		
+		To get current system date
+			LocalDate d = LocalDate.now();
+			
+		To get current system time	
+			LocalTime t = LocalTime.now();
+	
+	This classes are exists java.time package
+	
+		import java.time.LocalDate;
+		import java.time.LocalTime;
+
+		public class MyClass {
+			public static void main(String args[]) {
+				LocalDate d= LocalDate.now();
+				System.out.println(d);
+				LocalTime t = LocalTime.now();
+				System.out.println(t);
+			}
+		}
+			
+	// get current date and display in the form of dd-mm-yyyy
+
+		import java.time.LocalDate;
+
+		public class MyClass {
+			public static void main(String args[]) {
+				LocalDate d= LocalDate.now();
+				int dd = d.getDayOfMonth();
+				int mm= d.getMonthValue();
+				int yyyy=d.getYear();
+				System.out.printf("%d-%d-%d",dd,mm,yyyy);
+			}
+		}
+	
+	

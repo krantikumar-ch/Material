@@ -1,0 +1,1651 @@
+											React Js
+										---------------
+										
+What is React?
+---------------
+	
+	It is a javascript library to build fast web applications  
+	developed by facebook
+	All react applications are components. A component is essentially a piece of UI
+	Using react we will build bunch of independent, isolated, reusable components  to build complex user interfaces
+	Every react application place one component which is refer to a root component. So every react application is a tree component
+	
+	Every component will build with below syntax
+	
+		class ComponentName{
+			state={} // to represent the state of the component 
+			render(){ // used to represent Ui object
+			
+			}
+		}
+	Eg: consider twitter application. It has many components like navbar, trends, tweets. So this can be divided into different components
+							
+											App
+											 |
+											 |
+								-----------------------------
+								|				|			|
+							  navbar		   trends	   tweets
+															 |
+															 |
+														  ---------
+														  |		  |
+														 Like	DisLike
+
+	
+	React js will consider only to view the user interface.
+	It has Virtual DOM which is light weight DOM element. If any element in the component has updated virtual DOM will check and update only particular
+	element in the original DOM 
+														  
+
+Es6 Refresher
+--------------
+
+	
+	let, const:
+	-----------
+		let, const are new keywords to define variables
+		let scope is block variables
+		const is a constant and can't redefine with any other variables
+		
+	Objects:
+	--------
+	
+		const person={
+			name:'kranti',
+			walk:function(){},
+			talk(){}
+		}
+		we can create functions without using function keywords
+		we can call this person.talk();
+		person.name if we know the fieids
+		otherwise
+		const targeMember = 'name';
+		person[targetMember]
+	
+	this keyword
+	--------------	
+		consider below example
+		
+		const person={
+			name:'kranti',
+			walk(){
+				console.log(this);
+			}
+		}
+		person.walk();
+		Here this will give person object because the walk function is calling by person object. so it is referring person object
+		
+		const walk=person.walk;
+		Here we are referring walk function in person.walk 
+		walk();
+		Now it will return window object. But in react js it is using strict mode so it will refer undefined
+
+	functions in javascripts are is object
+		Using bind method we can pass this object
+			
+		in above example 
+			const walk = person.walk.bind(person)
+			As we mentioned above "functions are objects in javascript". In above syntax a new walk instance will create and that new function will be bind
+			to the person object. If we call the above method we will get person data.
+			walk();
+			
+	Arrow functions
+	---------------
+		Till Es5 we can write function
+			
+			var square = function(a){
+				return a*a;
+			}
+		
+		In Es6 we can write arrow functions (similar to lambda expression in java 8)
+			
+			const square = a => i*i;
+	
+		consider below example to filter active jobs
+			const jobs=[	{"id":1,"isActive":true},
+						   {"id":2,"isActive":true},
+						   {"id":3,"isActive":false}];
+		
+		We will write logic for this till Es5
+				var activeJobs = jobs.filter(function(row){
+												return row.isActive;
+											});
+				console.log(activeJobs);
+		
+		From Es6 onwards
+		
+			const activeJobs = jobs.filter(row=> row.isActive);
+			console.log(activeJobs);
+				
+		Arrow functions no need to bind to the "this"
+		
+	
+	Array.map() method
+	------------------
+		In Es6 map method introduced map() method
+		map() return new array with new item of each element in array
+			const colors=["red","green","yellow"];
+			const colorsWithTag = colors.map(color=> `<li>${color}</li>`);
+			console.log(colorsWithTag); ["<li>red</li>", "<li>green</li>", "<li>yellow</li>"]
+	
+	Object destructuring
+	--------------------
+		const address ={"state":'',"street":'',"city":''}
+		if we want get these object properties we will call
+		
+		const state = address.state
+		const street = address.street
+		const city = address.city
+		Here the problem is we are calling with address.street.
+		In object destructuring we will call
+			const {state,city,country} = address;
+		we can create alias names also
+			const(state:st}=address;
+			
+	Spread(...) operator
+	---------------
+		const first=[1,2,3,4];
+		console.log(...first); // it will print each element in new line
+		
+		const second =[5,6,7];
+		const combined=[...first, ...second];
+		It will used to clone arrays
+		
+		we can combine or clone objects using spread operator
+			const first={"name":"kranti"}
+			const second={"job":"techlead"};
+			const combined = {...first, ...second}
+		
+	classes
+	-------
+		we can create classes to instantiate objects
+			class Person{
+					constructor(name){ // It is a reserved keyword to initialize objects
+						this.name=name;
+					}
+				
+				walk(){
+					console.log("walk");
+				}
+			
+			}
+			
+		const person = new Person("kranti");
+		person.walk();
+		
+	inheritance:
+	------------
+		Using extends keywords we can perform inheritance
+		
+		class Person{
+					constructor(name){ // It is a reserved keyword to initialize objects
+						this.name=name;
+					}
+				
+				walk(){
+					console.log("walk");
+				}
+			
+			}
+		
+		class Teacher extends Person{
+			constructor(name,degree){
+				super(name); // mandatory if it is inheritance
+				this.degree=degree;
+			}
+			teach(){
+				console.log("teach method");
+			}
+		
+		}
+		
+	Modules
+	--------
+		Writing all classes into a single file we can write into separate files. 
+		Each file is called a module
+		classes are private. we have to export these files to visible to outside of the file
+		we can export, import classes as well as functions
+		
+		//person.js
+		export class Person{
+					constructor(name){ // It is a reserved keyword to initialize objects
+						this.name=name;
+					}
+				
+				walk(){
+					console.log("walk");
+				}
+			
+			}
+		
+		
+		//teacher.js
+		import {Person} from './person' /* Teacher class using Person class from person module. So we will import using above the syntax. If person is 
+											a module  from library we can directly call 'person'. If it is not from library we will call './' 
+											If person is using default keyword with export we can import Person without writing curly braces
+											
+											
+											*/
+		export class Teacher extends Person{
+			constructor(name,degree){
+				super(name); // mandatory if it is inheritance
+				this.degree=degree;
+			}
+			teach(){
+				console.log("teach method");
+			}
+		
+		}
+		
+		
+Components
+-----------
+	As we said Components are piece of UI
+		
+		import React, { Component } from 'react';
+
+		class Counter extends Component {
+			
+			render() { 
+				return <h1>Hello World</h1>       
+			}
+		}
+		 
+		export default Counter;
+		
+	React js will call render(). this render() is responsible to send jsx(javascript extension) a piece of UI 
+	jsx expression must have one element if we add <button> we will get exceptions.
+	so add <div> tag or use <React.Fragment> tag
+	
+	state is special property in react component. It contains data if component needs
+	
+	
+		class Counter extends Component {
+			state={
+				count:0,
+				
+			}
+
+			render() { 
+				return (    <React.Fragment>
+								<span>{this.formatCount()}</span> 
+								<button>Increment </button>
+							</React.Fragment>) ;     
+			}
+			formatCount(){
+				const {count} = this.state;
+				return count ==0 ? "Zero" : count;
+			}
+		}
+	{} used to render values dynamically
+	
+Setting attributes
+------------------
+	state={imageUrl:"https://picsum.photos/200"}
+	
+	in render method
+		render(){
+			return( <div>
+				<img src={this.state.imageUrl} alt=""/>
+				</div>
+		}
+	If you want to apply class to any tags we will give className instead of class. class is a reserved keyword in jsx
+	 <span style={{fontSize:30}} className="badge badge-primary m-2">{this.formatCount()}</span> 
+	 
+Rendering classes dynamically
+-----------------------------
+	We can render classes dynamically based on state count values 
+	 
+	 render() { 
+        return (    <React.Fragment>
+                        <span className={this.getBadgeClasses()}>{this.formatCount()}</span> 
+                        <button className="btn btn-secondary btn-sm">Increment </button>
+                    </React.Fragment>) ;     
+    }
+	
+	 
+	 getBadgeClasses(){
+        let classNames= "badge m-2 ";
+        classNames+= this.state.count == 0 ? " badge-warning" :" badge-primary";
+        return classNames;
+    }
+	
+	
+Rendering lists
+----------------
+	We can display array elements like [tag1, tag2, tag3] 
+	
+	In render method
+				<ul>
+					{this.state.tags.map( tag => <li key= {tag} > {tag} </li>)}
+				</ul>
+	virtual DOM element need to modify if any of the value is updated so make a unique key element in the list to identify the changes of DOM
+	
+Handling events
+----------------
+	All these react element properties have standard dom events
+		onClick, onKeyUp, onKeyDown etc.,
+	
+	Handling method we can declare in two ways 
+		1. normal method 	handleIncrement(){};
+		2. Arrow functions  handleIncrement = () =>{}
+		
+	In normal method we can't find object state and methods. If we want to get we have to bind this method in constructor
+		class Counter extends Component{
+			state={count:0}
+			constructor(){
+				super();
+				this.handleIncrement.bind(this);
+			}
+			handleIncrement(){
+				console.log("handle increment")
+			}
+		
+		}
+	Arrow functions does not need to bind object we can call object properties and states directly without binding 
+		handlelIncrement = () => console.log("handle Increment");
+		
+	<button onClick={this.handlIncrement} className="btn btn-secondary btn-sm">Increment </button>
+	
+	Arrow functions are recommended to use handling events
+	
+	Passing parameter to events
+	----------------------------	
+		In onClick we can pass parameters onClick = {()=>handleIncrement({id:1});
+		In handleIncrement = (product)=>{ console.log(product)}
+		
+	
+
+Updating state
+---------------
+	If you update property of change manually like this.state.count = ++count; React does not know that property was updated.
+	So it will not update the DOM element
+	We can call this.setState({count:++count}) method, inherited from the Component class. React will know the which property updated then the virtual DOM will update the proper element according to changes made in setState method
+	
+What happens when state changes
+-------------------------------
+	when this.setState() will tells to react state of the component changes. React will call render() (this is a synchronous call, will call in future)
+		render() { 
+			return (    <div>
+                        <span className={this.getBadgeClasses()}>{this.formatCount()}</span> 
+                        <button onClick={this.handleIncrement} className="btn btn-secondary btn-sm m-2"> + </button>
+                        
+                    </div>) ;     
+		}
+	 this render method will return a new react element which is two children. Virtual DOM will compare this new virtual DOM with old DOM. then it will
+	 check which element is update and will update only that particular element
+
+
+Composing Components
+---------------------
+
+		import React, { Component } from 'react';
+		import Counter from './counter';
+
+		class Counters extends Component {
+			state = { 
+				counters:[
+					{id:1,value:0},
+					{id:2,value:0},
+					{id:3,value:0},
+					{id:4,value:0}]
+
+			 }
+			render() { 
+				const {counters}=this.state;
+				return (  
+					<div>
+						{counters.map(counter =><Counter key={counter.id}/>)};
+					</div>
+				);
+			}
+		}
+
+	In the above example we created multiple counter components. As like adding key value we can add additional attributes to passing values
+		
+		{counters.map(counter =><Counter key={counter.id} value={counter.value}, selected="true" />)};
+	
+	Every react component a property called props which is a plain java script object. It includes all the attributes which we added in Counters components
+	will be available in Counter component
+	
+	In above example Counters component we added value, selected attributes those will be available in counter component props
+	key is a special keyword for identify unique elements. It will not available in props
+	Using these props value we can initialize Counter component objects
+	
+	We can pass another component as a child in props object. In props, we have a property called children(is an array object) we can get this children
+	using 
+		this.props.children in child components
+	If it has multiple children components are available then
+		this.props.children will give all child components. If we want particular component then we will go for 
+		this.props.children[0]
+		
+To debug React application need to add React Developer Tool plugin in chrome
+
+
+Props Vs State
+---------------
+
+									State									|					Props
+																			|
+				-------------------------------------------------------------------------------------------------------------------------
+					State data is local and particular to that component	|	Props includes the data which we give to component
+					Other components cannot access this data				|
+																			|	All the attributes which we set in parent component those are
+					Sometimes components will not have state data. all 		|	props data to input that component
+					they can get from props									|
+																			|	<Counter key={counter.id} value={counter.value}, selected="true" />
+																			|		here value and selected are props to the counter component, 
+																			|	These values we are setting into counters component
+																			|
+																			|	Props are read only. we can't change this data inside the  component.
+																			|  	If we want to manipulate data assign these values into any state object
+																			|	there we can manipulate
+																			|
+																			|
+			------------------------------------------------------------------------------------------------------------------------------------------
+			
+
+Raising and Handling events
+---------------------------
+	Let us assume we should remove Counter object when we call delete method. So we need to remove array element in Counters component. Means we need to change
+	state of the Components. 
+	The Rule of react application is
+		The component that owns a piece of the state, should be the one modifying it
+	adding a new array and removing element should be done by Counters component
+	
+	To solve this problem we should modify Counter component to raise an event. We will call that event and will write a method to handle it
+							
+							In counters components(parent component)
+					
+							handleDelete = (event,id)=>{
+								const counters = this.state.counters.filter(counter=>counter.id !== id);
+								this.setState({counters});
+							}
+						<Counter key={counter.id} value={counter.value} id={counter.id} onDelete={this.handleDelete} selected={true}/>
+	
+							In Counter component(Child component
+						
+						 <button className="btn btn-seconday btn-sm btn-danger m-2" onClick={(event)=>this.props.onDelete(event,this.props.id)}>Delete</button>
+	
+Single source of truth
+-----------------------
+	Single source of truth (SSOT) is a concept that an organization can apply as part of its information architecture to ensure that everyone in the organization uses the same data when making business decisions
+	
+	Each component has local state. Counter component has set state variable with props variable. When the state variable of Counters component changes it will
+	not reflect to the child components
+	
+	We need to remove the local state of counter component.
+	
+Removing the local state
+-------------------------
+	Removing local state and only relying under props only receives data when the component needs. We refer this kind of component as controlled component
+	A Controlled component does not have its own local state, it receives all the data via props and raises event whenever data needs to be changed. This component is entirely controlled by parent
+	
+	
+										---	Parent<--------------
+										|	  |					|
+										|	  |					|event
+									data|	  |					|
+										|-->Controlled-----------
+	
+Lifting the state up
+----------------------
+	consider below React component
+	
+										App
+										|
+										|
+								-------------------------
+								|						|
+							NavBar					  Counters(counters:[])
+														|
+														|
+													  Counter
+	In this above components if counter value is incremented then we will show total counter values in NavBar along with each counter value.
+	We know that data will share between components using props if they are in parent and child relation. Here Counter is child component of Counters component
+	so We shared data using props But in NavBar that is another component which has no relation with Counters component.
+	
+	In this situation if there is no relationship between two components and these two components make it in sync we need to lift state up
+	So counters[] we will lift up to parent component(App) so that they can share data between NavBar and Counters
+	
+										App(counters:[])
+										|
+										|props
+								-------------------------
+								|						|
+							NavBar					  Counters
+														|
+														|
+													  Counter
+	
+
+Stateless functional component
+-----------------------------
+	consider below component
+		
+		class NavBar extends Component{
+			render(){
+				return (
+					<nav className="navbar navbar-light bg-light">
+						<a className="navbar-brand ">Navbar <span className="badge badge-pill badge-secondary">
+						{this.props.totalCount}</span></a>
+					</nav>
+				  );
+			}
+		}
+	In the above class we have only render method. It does not have any event handlers, helper methods and state object. The displaying data will come from props
+	In situations like this we can convert this class into stateless functional component
+	
+		const NavBar = (props) => {
+			return (
+				<nav className="navbar navbar-light bg-light">
+					<a className="navbar-brand ">Navbar <span className="badge badge-pill badge-secondary">
+					{props.totalCount}</span></a>
+				</nav>
+			  );
+		}
+	In functional component react will pass props object at run time. There is no other difference between class component and functional component
+
+	
+Life cycle Hooks
+-----------------
+		Components will go through some phases during there life cycle
+		
+			MOUNT(when instance of component created							UPDATE(when state or props					UNMOUNT(when component will delete
+					and inserted into DOM)											of component get changed)						in DOM)
+				
+				constructor															render										componentWillUnmount
+				render																componentDidUpdate				
+				componentDidMount
+	
+	In react document we have some more life cycle methods but those will not use often
+	We can't use life cycle methods in stateless functional component because stateless functional component is a single function
+	
+	Mounting Phase
+	--------------
+	
+		constructor
+			It will calls once when instance of class created. It is perfect place to initialize state values or props values.
+								constructor(){
+									super();
+								}
+			If we want to set props to this constructor. we should pass props as parameters to constructor
+								constructor(props){
+									super(props);
+								}
+		
+		componentDidMount
+			This phase will call after the component render into DOM. This is perfect place to perform ajax calls
+					componentDidMount(){
+						console.log("component did mount");
+						//ajax call
+					}
+			After performing ajax call we will set the value in setState()
+	
+		render
+			It will return jsx tags to DOM
+			If component is render all its child components will render recursively
+			
+	Updating phase
+	--------------
+		This phase will call when state or props updates
+		
+		componentDidUpdate
+			This method is called after a component updated. so we can compare with old state and new state in this stage
+			It has two parameters previous props and previous state
+					componentDidUpdate(prevProps, prevState){
+						console.log(prevProps);
+						console.log(prevState);;
+						//we can compare prevState and prevProps with new state
+						if(prevProps.counters.value !== this.props.counters.value){
+						
+						}
+					
+					}
+					
+	UnMounting phase
+	----------------
+		This phase will call before deleting component from DOM
+					ComponentWillUnmount(){
+						console.log("component unmount");
+					}
+			This will used to cleanup code
+			
+	
+lodash
+------
+	npm i lodash@4.17.10
+	
+	Lodash has pre defined utility java functions which are ready to use. We can use those functions by
+		import _ from 'lodash''
+		_.splice()
+		_.take()
+		
+prop-types
+----------
+	npm i prop-types@15.6.2
+	
+	prop types are used to check prop type. It is a good practice  add propTypes to re-usable component
+		
+		import propTypes from 'prop-types';
+		
+		const Pagination = (props){
+			const {itemsCount,pageSize,onPageChange,currentPage} = props;
+		
+		}
+		
+		
+		Pagination.propTypes={
+			itemsCount:propTypes.number.isRequired,
+			pageSize:propTypes.number.isRequired,
+			onPageChange:propTypes.func.isRequired,
+			currentPage:propTypes.number.isRequired
+		}
+	
+	Using the above pagination propTypes we can make sure types of props and mandatory. If we send any wrong type we will get error in console
+
+defaultProps
+------------
+	we can add some default properties to component so that parent component does not need to send.
+	
+					ListGroup.defaultProps={
+					textProperty:"name",
+					valueProperty:"_id"
+				}
+				
+	Parent component no need to send these properties
+	
+	
+Routing and Navigation
+----------------------
+	Unlike angular js react does not implement routing. React is light weight component and it is only responsible to rendering view
+	So to achieve routing concept we should install react router
+			npm i react-router-dom@4.3.1
+			react-router-native. this is for native mobile applications
+	
+	To  implement Router we need two components
+		BrowserRouter
+		Router
+		
+			import {BrowserRouter} from 'react-router-dom';
+			ReactDOM.render(
+				<BrowserRouter>
+					<App />
+				</BrowserRouter>, document.getElementById('root'));
+	
+	BrowserRouter is a component which is used to grab history object and passes to component tree so that we can use browse history in all places
+	
+	
+	Router is a component to routing. It has two props path,component.
+	Router component matches the path it will render the component
+		
+
+			import {Route} from 'react-router-dom';
+			class App extends Component {
+			  render() {
+				return (
+				  <div>
+					<NavBar />
+					<div className="content">
+					  <Route path="/products" component={Products}/>
+					  <Route path="/posts" component={Posts}/>
+					  <Route path="/admin" component={Dashboard}/>
+					  <Route path="/" component={Home}/>
+					</div>
+				  </div>
+				);
+			  }
+			}
+
+	Router algorithm will identify if the starting path matches then it will display the corresponding component. Here Home component will display
+	always because it starts with "/". To solve this problem we have two solutions
+		exact property
+		Switch component
+		
+		exact: <Route path="/" exact component={Home}/>
+			
+			import {Route,Switch} from 'react-router-dom';
+			<Switch>
+			  <Route path="/products" component={Products}/>
+			  <Route path="/posts" component={Posts}/>
+			  <Route path="/admin" component={Dashboard}/>
+			  <Route path="/" exact component={Home}/>
+			</Switch>
+			
+	Link Component
+	--------------
+		In NavBar we user anchor tags for routing. For every routing it will call http requests. 
+		To make it Single page application We will use Link Component
+		
+		import {Link} from 'react-router-dom';
+
+			const NavBar = () => {
+			  return (
+				<ul>
+				  <li>
+					<Link to="/">Home</Link>
+				  </li>
+				  <li>
+					<Link to="/products">Products</Link>
+				  </li>
+				  <li>
+					<Link to="/posts/2018/06">Posts</Link>
+				  </li>
+				  <li>
+					<Link to="/admin">Admin</Link>
+				  </li>
+				</ul>
+			  );
+			};
+	
+	NavLink component
+	------------------
+		NavLink is a component of react-router-dom module. It is similar to Link component and have one difference. i.e., It will show active of selected 
+		component
+		
+	Router props
+	------------
+		Route component is a router if path mathes it will render the component. It will inject three props
+			history,location, match
+			
+	Passing Props to Route component
+	----------------------------------
+		We can pass our custom props along with  predefined props(history, match, location) using render method instead of Component 
+		
+		<Route path="/Products" render = { props => <Products sort="newest" {...props}/>}
+		
+	Route Parameters
+	----------------
+		Sometimes we need to send parameter to route component
+			<Route path="/products/:id" component={ProductDetails}/> Note: this route is most specific thats y we kept at first
+           <Route path="/products" component={Products}/>
+		  These params will available mathc params with id attributes
+		  We can read this params in component by using
+			this.props.match.params.id
+		
+		We can passing multiple route parameters to the Route
+			<Route path="/posts/:year/:month" component={Posts}/>
+			
+		Sometimes parameters might be optional If we are declare above syntax parameters are mandatory. If we did not send parameters it will not
+		render the component. To make it is optional we can use ? at end of parameter
+			<Route path="/posts/:year?/:month?" component={Posts}/>
+		
+	QueryString parameters
+	----------------------
+		We can send queryString parameters as a url. These query string values we can get from props.location.search attribute. these location inject by route component
+			The search attribute will have query string like ?paramName1=value1&paramName2=value2
+			To parse this query string we will install query-string from npm. This is a popular npm to parse query-string
+				npm i query-string@6.1.0
+			
+			Example:
+				http://localhost:3000/posts/2019/01?sortNew=true&test=1
+				
+				import queryString from 'query-string';
+				 const result= queryString.parse(location.search);
+				 {sortNew: "true", test: "1"}
+				
+				These json values always String. If we are dealing with other types we can change accordingly
+				
+			
+	Redirects
+	---------
+		Redirect is a component from react-router-dom. to redirect url from one url to another url. Let us assume if a url matches messages then it should redirect to posts.
+			import {Route,Switch,Redirect} from 'react-router-dom';
+				
+			 <Redirect from ="/messages" to="/posts"/> If url matches to messages then it will redirect to posts
+			 
+			 <Route path ="/not-found" component={NotFound}/>
+			 <Redirect to="/not-found"/>
+			
+			If url is match to any path then we will redirect to not found using above Redirect component syntax
+			
+	Programmatic Navigation
+	-----------------------
+		Redirect to the user by clicking button or form. This is called Programmatic navigation.
+		To achieve this we have history in props. It has useful methods like go, goBack, goForward, push, replace methods to navigate.
+		
+		handleSave = () => {
+			this.props.history.push('/products');
+		};
+		
+		handleSave = () => {
+			this.props.history.replace('/products');
+		};
+			
+		The only difference between push and replace method is push will redirect to url and will hold browser history. If user clicks back button of browser the
+		page will navigate to the previous url whereas replace method will not hold browser history.
+		
+		If user clicks on login button it should navigate to another page and no need to hold browser history. In this place we can use replace method
+		
+
+Handling Form submission
+-------------------------
+	"for" is used in bootstrap to highlight selected component. Here for is a reserved keyword in react js as same as class.
+	So instead of for we will use "htmlFor" 
+	
+	For login form, registration form we will use html <form> tags
+		
+		<form>
+          <div className="form-group">
+            <label htmlFor="userName">User name</label>
+            <input id="userName" type="text" className="form-control" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input  id="password" type="text" className="form-control" />
+          </div>
+		  <button className="btn btn-primary">Login</button>
+        </form>
+		
+	By default form tags will call the server and re render the page again. This is not expecting behavior. To control this every form element has onSubmit
+		
+		<form onSubmit={this.handleSubmit}>
+		
+		
+		handleSubmit = e =>{
+			e.preventDefault(); // prevent default behavior
+			console.log("submit called"); // to print console
+		}
+		
+	Refs
+	------
+
+		When submit form we need the values. In plain javascript we will get values by using document object. But in react we can't access dom object. 
+		
+		In order to get access the dom element we need to give reference. Let us assumme in the above if we need to get use name input value dom element we will
+		create reference of that
+			username=React.createRef();
+			<input id="userName" ref={this.username} type="text" className="form-control" />
+			
+		at submit time
+			handleSubmit = e =>{
+			e.preventDefault(); // prevent default behavior
+			this.username.current (will return dom element).value (returns value)
+		}
+		If you need to access dom element this is the way to do it. To building forms we have better ways to get values other than ref
+		
+		As a rule of thumb we should minimize the use of refs. Use it only what you are doing. 
+		Ex. Using animations, third party dom libraries
+		
+	Controlled elements
+	--------------------
+		to get values from form group follow below steps			
+		
+		1. Create a state variable
+			state={ 
+				account:{username:'',password:''} 
+
+			}
+		2. Assign the value to state variable. assign a change event. This change event when user writes anything it will call onchange event
+			<input
+              id="userName"
+			  autoFocus
+			  value={this.state.account.username}
+			  type="text"
+			  onChange={this.handleChange}
+              className="form-control"
+            />  // 
+			
+		3. Assign the changed value in state attribute
+			handleChange = e=>{
+				const account = {...this.state.account};
+				account.username=e.currentTarget(this returns input field).value;
+				this.setState({account});
+			  }
+	
+	Handling multiple inputs
+	------------------------
+		If we are handling multiple inputs we need to write multiple onchange events right?
+		Of course no need. In handleChange event we are getting input field. So set a name attribute which is name as state value name
+		
+		In above example add one more attribute name field in input tag i.e., name="usename" same as key in state object
+		In handleChange event change below line
+			account[e.currentTarget(returns input and get value of name attribute).name] = e.currentTarget.value;
+		
+		We can get all attribute values using e.currentTarget
+		In the below input
+			<input
+              id="userName"
+			  autoFocus
+			  value={this.state.account.username}
+			  type="text"
+			  name="username"
+			  onChange={this.handleChange}
+              className="form-control"
+            />  
+		we can get attribute values like id, value, name, type, className in onChange event by using
+				e.currentTarget.id,
+				e.currentTarget.value,
+				e.currentTarget.name,
+				e.currentTarget.type,
+				e.currentTarget.className,
+			
+			
+	null,undefined cannot be use as controlled elements like username: null, or not declaring username in state object
+	
+	As of thumb rule whenever build in form initialize to empty string or get some values from server
+	
+	validations:
+	------------
+		Assume a login form of an application. Username and password should be required we can do validations of these fields
+		
+		add errors object in state object
+
+			state = {
+				account: { username: "", password: "" },
+				errors: {}
+			  };
+		In submit method we can call validate method to perform validations
+			
+			validate = () => {
+				const { account } = this.state;
+				const errors = {};
+				if (account.username.trim() === "") {
+				  errors.username = "Username is required.";
+				}
+				if (account.password.trim() === "") {
+				  errors.password = "Password is required.";
+				}
+				return Object.keys(errors).length === 0 ? null : errors;
+			  };
+		
+	
+			handleSubmit = e => {
+				e.preventDefault();
+				const errors = this.validate(); //cal validate method
+				console.log(errors);
+				if (errors) {
+				  return;
+				}					// if there is no errors we can perform service calls
+				//call the server
+			  };
+
+		displaying error message
+		-------------------------
+			We will give responsibility to the input field display error message
+				add error props
+				
+				const Input = ({name,label,value,onChange,error}) //error props
+					return (
+
+					<div className="form-group">
+						<label htmlFor={name}>{label}</label>
+						<input
+						  id={name}
+						  autoFocus
+						  value={value}
+						  type="text"
+						  name={name}
+						  onChange={onChange}
+						  className="form-control"
+						/>
+						{error&&<div className="alert alert-danger">{error}</div>} // add bootstrap error log to display error msg
+					  </div>
+
+				  );
+			Pass the error props from parent component
+						
+					<Input
+					name="username"
+					value={account.username}
+					label="Username"
+					onChange={this.handleChange}
+					error={errors.username} // error props
+				  />
+				
+		Joi
+		---
+			Joi is a powerful library to perform validations
+				npm i joi-browser@13.4
+		
+			Here are the steps
+				1. add schema object
+					 schema={
+						username:Joi.string().required(),
+						password:Joi.string().required()
+					  }
+				2. call joi.validate() when you perform validation 
+					const result = Joi.validate(this.state.account,this.schema,{abortEarly:false});
+					// Joi throw error when first validation fails. that is called abortEarly. If we need to perform all vaidations whe should set 
+					abortEarly:false
+						
+			
+			  schema={
+				username:Joi.string().required().label("Username"),//label is using to display at message of name
+				password:Joi.string().required().label("Password")
+			  }
+				
+			validate = () => {
+				const { account } = this.state;
+				const options={abortEarly:false}
+				const result = Joi.validate(account,this.schema,options);
+				//console.log(result);
+				const error = result.error;
+				if(!error) return null;
+				const errors={};
+				for(let item of error.details){
+					errors[item.path[0]] = item.message;
+				}
+				console.log(errors);
+				return errors;
+			  };	
+			
+			
+Calling Backend services (sample app is Section 8- Calling Backend Services\start\http-app)
+------------------------
+	There are some libraries to call backend services from react js
+		Fetch Api       // all modern browsers will support
+		Jquery Ajax		// can use jquery ajax
+		Axios 			// very popular library 
+		
+			npm i axios@0.18
+		
+	getting data:
+	-------------
+		Right place to call the data in react life cycle is componentDidMount. We will call a service using axios from componentDidMount life cycle hook
+			
+			componentDidMount() {
+				const promise = axios.get("https://jsonplaceholder.typicode.com/posts") // url
+			 }
+		This method returns promise. A promise is an object that holds a result of asynchronous operation
+		This promise object promises holding object from asynchronous operation
+		Initially promise object status is 
+			pending >> resolved(success) >> rejected(Failure)
+		promise does not have the object PromiseStatus directly to access. It has internally property.
+		similarly it has PromiseValue which is actual data
+		
+		promise object has method then() with this method we can get result from asynchronous operation. This is old way of doing
+		
+		In modern browser we have await keyword
+			componentDidMount() {
+				const promise = axios.get("https://jsonplaceholder.typicode.com/posts") // url
+				const response = await promise
+			}
+		whenever we are using await keyword then the function should be declare in async keyword. Now our componentDidMount life cycle hook will be
+			async componentDidMount() {
+				const promise = axios.get("https://jsonplaceholder.typicode.com/posts") // url
+				const response = await promise
+			}
+		Now the response.data will have asynchronous result object. To make cleaner code
+		
+			async componentDidMount() {
+				const {data:posts} = await axios.get("https://jsonplaceholder.typicode.com/posts") // url
+				this.setState({posts});
+			}
+		
+	Creating data:
+	--------------
+		 handleAdd = async() => {
+			const obj={title:'a',body:'b'}
+			const {data:post} = await axios.post(apiEndPoint,obj); //post method will use to post data
+			const posts = [post, ...this.state.posts];
+			this.setState({posts});
+		  };
+		 similarly we have put,patch, delete methods in axios to perform update and delete operations
+		 
+		While performing http operations it will take time to perform operations. 
+		Consider deleting a row by calling backend service. After clicking delete button it will take time to delete row in web application. 
+		So to make application faster first we will delete row in UI then we will call backend services. If we got any errors from backend service
+		we will restore previous state of the application
+		
+				handleDelete = async post => {
+				const originalPost = this.state.posts;
+				const posts = this.state.posts.filter(p=> p.id !== post.id);
+				this.setState({posts});
+				
+				try{
+				  await axios.delete(apiEndPoint+"/"+post.id);
+				  throw new Error("");
+				}
+				catch(ex){
+				  alert("Something failed while deleting a post");
+				  this.setState({posts:originalPost})
+				}
+				
+			  };
+		In the exception object we have two properties response, requests
+			response.status will return status of the response (404,400..);
+		Based on this status we will display proper exception to the user
+			
+				try {
+				  await axios.delete(apiEndPoint + "/" + post.id);
+				  throw new Error("");
+				} catch (ex) {
+				  if(ex.response && ex.response.status === '400'){
+					alert("Something failed while deleting a post");
+				  }
+		
+	Handling Unexpected errors Globally
+	------------------------------------
+		Using axios interceptors we can intercept request, response. If we get unexpected error we can handle using this interceptors
+		This will use when we handle global exceptions
+		
+		axios.interceptors.response.use(success,error=>{}) // interceptors has two properties request and response. This response has two functions
+		success, error. In this case we are handling error functions so we will make success function null
+		
+							
+				axios.interceptors.response.use(null, error => {
+				  const expectedError =
+					error.response &&
+					error.response.status >= 400 &&
+					error.response.status < 500;
+				  if (!expectedError) {
+					console.log("Logging the error ", error);
+					alert("An unexpected error occured");
+				  }
+				  return Promise.reject(error);
+				});
+				
+	To display toastify notifications instead of alert box 
+		npm install react-toastify@4.1
+		
+		toast is a function.
+		if we want any specific we can provide toast.error() or we can use to show messages we can call directly toast()
+		
+		In httpService.js
+		
+			import {toast} from 'react-toastify';
+
+				axios.interceptors.response.use(null, error => {
+				  const expectedError =
+					error.response &&
+					error.response.status >= 400 &&
+					error.response.status < 500;
+				  if (!expectedError) {
+					console.log("Logging the error ", error);
+					toast.error("An unexpected error occured");
+				  }
+				  return Promise.reject(error);
+				});
+				
+			In App.jsx
+			
+				import {ToastContainer} from 'react-toastify';
+				@render Method
+					<React.Fragment>
+						<ToastContainer/>
+	
+	Logging errors
+	---------------
+		console.log is useful to log the data in client machine. This is fine in develop environment but not in production. we can't see the logger msgs.
+		To log errors in production errors we will go for service provider to save our logger errors. Sentry is one of the service provider
+	
+			npm i @sentry/browser
+		The issues will track in sentry.io webapplication
+		
+		Below is the snippet code to use sentry
+		
+		index.js
+		---------
+		import * as Sentry from '@sentry/browser';
+		
+		
+		Sentry.init({
+		 dsn: "https://e826f0ad26a04502a43206ef6285323a@sentry.io/1427975",
+		 release:"react-app@1.0.0",
+		 environment:"development-test"
+		});
+		
+		// should have been called before using it here
+		// ideally before even rendering your react app
+
+		
+		httpservice.js
+		
+		import * as Sentry from '@sentry/browser';
+		
+		axios.interceptors.response.use(null, error => {
+		  const expectedError =
+			error.response &&
+			error.response.status >= 400 &&
+			error.response.status < 500;
+		  if (!expectedError) {
+			Sentry.captureException(error);
+			toast.error("An unexpected error occured");
+		  }
+		  return Promise.reject(error);
+		})
+		
+			
+Authentication and Autherization
+=================================
+	After login the user, the server will send a response called authentication token known as JWT(Json web token). 
+	This will have the information of logged in user payload like name,email, logged in time(which is sent by the server)
+	we will store this token in browser local storage by 
+		localStorage.setItem(key, value)
+		This localStorage is one for per domain;
+	jwt.io will debug the code
+	In this application we used jwt standards to decode json(get user payload).for that we need to install 
+		npm i jwt-decode@2.2.0
+	below are the snippet for decode
+		
+		import jwtDecode from 'jwt-decode';
+		
+		try {
+		  const token = localStorage.getItem("token");
+		  const user =jwtDecode(token);
+		  this.setState({user}); 
+		} catch (ex) {
+
+		}
+		
+	Some security applications need to send tokens in the headers of the request.
+	So for that we need to send tokens in headers using 
+		axios.defaults.headers.common[tokenName] = token;
+	Here common means it will apply all requests. If you want only for put method or post method. we will use put or post instead of commmon
+	
+	
+Protecting routes
+------------------
+
+	 <Route 
+              path="/movies/:id" 
+              render = {props =>{
+                if(!user) return <Redirect to ="/login"/>
+                return <MovieForm {...props}/>
+              }}
+              />
+	
+
+		import React from 'react';
+		import {Route,Redirect} from 'react-router-dom';
+		import auth from '../../services/authService';
+
+		const ProtectedRoute = ({path, component:Component, render, ...rest}) => {
+			return (
+				<Route 
+					  path={path} 
+					  {...rest}
+					  render = {props =>{
+						if(!auth.getCurrentUser()) return <Redirect to ="/login"/>;
+						return Component ? <Component {...props}/>  : render(props);
+					  }}
+					/>
+			);    
+		}
+		 
+		export default ProtectedRoute;
+		
+		 <ProtectedRoute path="/movies/:id" component={MovieForm} />
+		
+		const ProtectedRoute = ({ path, component: Component, render, ...rest }) => {
+		  return (
+			<Route
+			  path={path}
+			  {...rest}
+			  render={props => {
+				if (!auth.getCurrentUser())
+				  return (
+					<Redirect
+					  to={{ pathname: "/login", state: { from: props.location } }}
+					/>
+				  );
+				return Component ? <Component {...props} /> : render(props);
+			  }}
+			/>
+		  );
+		};
+
+		 
+Deployment
+-------------
+		 
+	environment variables
+	----------------------
+		under the src folder create .env folder 
+			.env.development
+				If we need any environment variables for development we can store values in key value pair
+					REACT_APP_NAME=vidly in dev
+					REACT_APP_VERSION=1.0
+				key names should start with REACT_APP_ otherwise it will not recognize
+				
+				console.log(process.env); display environment variables
+				
+				console.log(process.env.REACT_APP_NAME); // environment variables will be replace in static bundle js code
+		
+	Building for Production
+	------------------------
+			npm run build // for production
+				After ready for deploy we may serve with static server
+				npm install -g serve
+				serve -s build
+				
+			npm start	 // for developmment it wil enviroment variables from .env.development
+			npm test	// for testing
+			environment variables which we set in application using .env.development those will take at the time of building
+			
+			
+			
+			
+			
+Life cycle Hooks (different stages of component)
+-----------------
+
+		First render						props change					state change						unmount
+	------------------					--------------------			--------------------				-----------------
+		getDefaultProps					componentWillReceiveProps			shouldComponentUpdate			componentWillUnmount
+			|										|								|
+			|										|								|
+		getInitialState						shouldComponentUpdate			componentWillUpdate
+			|										|								|
+			|										|								|
+		componentWillMount					componentWillUpdate					   render	
+			|										|								|
+			|										|								|	
+		  render								   render					componentDidUpdate	  
+			|										|								
+			|										|								
+		componentDidMount					componentDidUpdate
+	
+
+	
+	npm create-react-app is no longer support by react. Uninstall the old by using 
+		npm uninstall -g create-react-app
+		
+	install latest version of node js then use 
+		npx create-react-app react-advance
+
+	no need to install create-react-app use in same line
+	
+	React Advanced concepts
+	------------------------
+	
+		Higher order components (sample app: E:\kranti\js\React js\sample apps\react-advanced)
+		-----------------------
+			create a new function pass component as a parameter and return a new component that wraps original component. In the bigger component we will add
+			our common logic.
+			
+			function withToolTap(Component) {  //first letter of argument should be capital
+				return class WithToolTip extends React.Component{
+					
+					mouseOver =() => {this.setState({showToolTip:true});
+					mouseOut =() => {this.setState({showToolTip:false});
+					render(){
+						return (
+							<div onMouseOver={this.mouseOver} onMouseOut={this.mouseOver}>
+								<Component showToolTip={this.state.showToolTip}/>
+							</div>
+						)
+					}
+				}
+			
+			}
+			export default withTooltip;
+		
+		In Movie.jsx
+			class Movie extends React.Component{
+				render(){
+					return (<div>
+						Movie
+						{ this.props.showToolTip && <div> some tooltip</div>}}
+						
+						</div>);
+			}
+			
+			export default withToolTip(Movie);
+			
+	Hooks:
+	------
+		Earlier Functional components are stateless and class components are stateful. If we want to maintains stateful we will use class components.
+		
+		In React 16.8 new feature called Hooks that allows built components as same as class component
+		
+		Why Hooks?
+			Classes are bit difficult to understand who does not have object oriented program knowledge
+			the this keywords we have to deal with this keyword using in class component
+			BoilerPlate code. Everytime we will create class and functions to maintain components
+			
+		Hook is a function that allows us to hook into react features like working with state or life cycle functions.
+		
+		useState :
+		----------
+			It is  a hook import from the react library. If React functions starts with use the it is a React Hook
+			
+				const [count, setCount] = useState(1) 
+				UseState function returns an array with two items. 
+				first item is a value. (this.state.count);
+				second item is a function that is equivalent (this.setState())
+				
+				we can pass any type to useState. we can pass arrays, objects etc.,
+				one rule is to follow i.e., Hooks cannot call in conditions, loops, nested functions
+					
+				
+			
+				import React,{useState, Fragment} from 'react';
+					function counter(){
+						const [count, setCount] = useState(0); //parameter is initial value of count
+						const [name, setName] = useState(''); //parameter is initial value of name
+						return(
+							<Fragment>
+								<input type="name" onChange={(e)=>setName(e.target.value}/>
+								<div>
+									{name} pressed {count} times !!!
+								</div>
+								<button onClick={()=>setCount(count+1)}>"Increment"</button>
+							</Fragment>
+						
+						)
+					}
+		
+		useEffect:
+		-----------
+			componentDidMount, componentDidUpdate, componentWillUnmount  performs single function useEffect
+			
+			 useEffect(()=>{
+				document.title=`${name} has clicked ${count} times`
+				return()=>{
+					console.log("Clean UP")   // the return function will call componentWillUnmount
+				}
+			}, [name]) // this array is optional. This allows to call this methods when arguments of parameters are changed
+			
+		custom Hooks
+		------------
+		export default updateDocumentTitle function
+			useEffect(()=>{
+				document.title=`${name} has clicked ${count} times`
+				return()=>{
+					console.log("Clean UP")
+				}
+			}, [name])
+	
+Redux with React(sample app: E:\kranti\js\React js\sample apps\redux-app)
+----------------
+	
+	Managing same state with multiple components is difficult in react
+	let us look below example
+				
+								App Component(state={a:''}
+									|
+									|
+						---------------------------------
+						|								|
+					User Component(props a)			Main Component(props a)
+						|
+						|
+					Other Component(props a)
+
+	
+	In the above example state a of App component is props to User, main and Other component. So I want to change state of a in Other component it should reflect in all components.
+	In React, the approach is we will create a function which can change state of a in App component. This function will pass as props along with a into the all components.
+	This approach is difficult to maintain in all components. So We will go for redux
+	Redux is different approach
+	
+								Action <----------------------------------------------------------------
+								  |																		^ dispatch
+								  |																		|	
+								  |																		|	when state changes		
+								  |																		|	it will dispatch action
+				Handling Action Reducer -> It will take old state and manipulate						|
+				to change state   |			with changed value and create new state						|
+								  |			and will send to store										|
+								  |																		|
+								  |																		|
+					store state Store -------------------------------------------------------------> View/App							
+						(only one store in redux)				subscribe(pass state)	
+	
+
+	In redux we have only one state and can have multiple reducers
+	
+	The above application will be with redux is like below
+	
+										subscribe							subscribe
+									-----------------------Store-------------------------------------
+									|						 										|
+									|																|
+									|																|
+									|					App Component								|				
+									|						|										|
+									|						|										|	
+									|			---------------------------------					|
+									|			|								|					|
+									|------->User Component				Main Component<--------------	
+									|			|
+									|			|
+									|------>Other Component	
+											
+	
+	npm install redux, react-redux
+	npm install redux-logger(to log errors)
+	
+	If any middleware the redux flow will be
+	
+								Action <----------------------------------------------------------------
+								  |																		^ dispatch
+								  |																		|	
+								  |																		|	when state changes		
+								  |																		|	it will dispatch action
+				Handling Action Reducer -> It will take old state and manipulate						|
+				to change state   |			with changed value and create new state						|
+								  |			and will send to store										|
+								  |																		|
+								  |																		|
+								middleWare																|					
+								  |																		|	
+								  |																		|
+					store state Store -------------------------------------------------------------> View/App							
+						(only one store in redux)				subscribe(pass state)	
+
+	
+	The Reducer is a function and will be 
+	
+		const UserReducer = (state, action) =>{
+			 case "Name":
+			  state = { ...state, name: action.payload };
+			  break;
+			case "age":
+			  state = { ...state, age: action.payload };
+			  break;
+		  return state;
+		}
+		export default UserReducer;
+		
+	The store will be
+		import {createStore} from 'redux';
+		import UserReducer from 'user-reducer';
+		
+										|-> first parameter is reducer
+		export default createStore({user:UserReducer},{})
+													   |-> initial state of store
+													   
+	if we have multiple reducers the we will use combineReducers and if we have middlewares  will use applyMiddleware.]
+	Now the store will be
+		
+		import { createStore, combineReducers, applyMiddleware } from "redux";
+		import { logger } from "redux-logger";
+		import userReducer from "./reducers/userReducer";
+		import mathReducer from "./reducers/mathReducer";
+
+		export default createStore(
+		  combineReducers({ user: userReducer, math: mathReducer }),
+		  {},
+		  applyMiddleware(logger)
+		);
+	
+	
+	We will connect our component to this reducer and store
+	
+	import React,{Component} from 'react';
+	import { connect } from "react-redux";
+	
+	class AppComponent extends Component{
+	
+		render(){
+			const {name,age,changeName} = this.props;
+			return(<div>
+						<h1> User  name:{name} </h1>
+						<h1> User  age:{age} </h1>
+						<button onClick ={()=>{changeName("kranti")}}>Change name</button>
+					</div>);
+		}
+	
+	}
+	//this method will give the state(from store) whatever we required values to the component we will return those values as Json. The returned
+	Json values come as props to our component
+	
+	const mapStateToProps = (state)=>{
+		const{user} = state;
+		return{name:user.name,age:user.age};
+	}
+								
+	const mapDispachToProps = (dispatch)=>{
+		changeName:(name)=> dispatch({
+			type:"Name",
+			payload:name
+		}
+	}
+	
+	In above MainCompoent while clicking on "Change Name" button we need to change the name. So the above dispatch method will helps to dispatch an action
+	to the reducer. Now the reducer will change the state of the user object then it will send to store. Once store object is change it will send the changed 
+	state object to all subscribed components
+	
+	Now we will connect to these methods to redux using connect method.
+	
+			
+	export default connect(mapStateToProps,mapDispachToProps)(MainComponent); // first parameter stateToProps second parameter is dispatch
+	
+	
+	sometimes component needs some props other than from state object from store. i.e, those props will send by used component
+	These props we can get from mapStateToProps function
+	
+		const mapStateToProps(state, otherProps)
+										|-> this contains props send by used component
+										
+										
+						---------------------------------------------------------------------------------------------
+						|																							| dispatch({type:'name',payload:'kranti'})
+					  Action({type,payload})																		|			
+						|																							|		in mapDispatchToProps function
+						|																							|							
+						|																							|
+					  reducer(userRed=(state,action)={																|	
+						|		switch(action.type){																|
+						|			case 'Name': state={...state,name:action.payload};								|
+						|							break;															|
+						|				default:state;																|
+						|			return state;																	|	
+						|		}																					|
+						|		};																					|
+						|		)																					|
+						|																							|	
+						|																							|	
+						|																							|
+					   Store----------------------------------------------------------------------------------->MainComponent	
+				createStore(userReducer,{});																	const mapStateToProps = (state)=>{
+																													const{user} = state;
+																													return{name:user.name,age:user.age};
+																												}
+																																			
+																												const mapDispachToProps = (dispatch)=>{
+																													changeName:(name)=> dispatch({
+																														type:"Name",
+																														payload:name
+																													}
+																												}	   
+																				export default connect(mapStateToProps,mapDispachToProps)(MainComponent); 
+
+
+
+
+		
+	
